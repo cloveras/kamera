@@ -5,7 +5,7 @@ Generates HTML for image directories created by a web camera: ./20151202/image-2
 Shows the following, depending on the query string:
 * Today's images: empty string, or '?'
 * The latest image: ?1
-* All images for a date: ?day&date=20151202
+* All images for a date: ?type=day&date=20151202
 * All images for a month: ?type=month&year=2015&month=12
 * One specific image: ?type=one&image=2015120213560301 
 

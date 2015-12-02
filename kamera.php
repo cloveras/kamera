@@ -12,6 +12,8 @@
 // Not responsive, not using any framework, and all text is hardcoded.
 // In Norwegian. 
 //
+// For surprisingly verbose feedback for debugging, etc: $debug = 1
+//
 // Have a look: http://superelectric.net/viktun/kamera/
 // ============================================================
 
@@ -150,13 +152,15 @@ function split_image_filename($image_filename) {
 // Midnight sun? (tested with date_sunrise() and GPS coorinates used in this script)
 // ------------------------------------------------------------
 function midnight_sun($month, $day) {
+  // TODO: Base this on latitude and longditude.
   $return = (($month == 5 && $day >= 24) || ($month == 6) || ($month == 7 && $day <= 18));
   return $return;
 }
 
-// Is it "darknesstime" (no sun)? (tested with date_sunrise() and GPS coordinates used in this script)
+// Is it polar night (no sun)? (tested with date_sunrise() and GPS coordinates used in this script)
 // ------------------------------------------------------------
 function polar_night($month, $day) {
+  // TODO: Base this on latitude and longditude.
   $return = (($month == 12 && $day >= 6) || ($month == 1 && $day <= 6));
   return $return;
 }
@@ -178,9 +182,9 @@ function find_sun_times($timestamp) {
   // Where: Fylkesveg 862 110, 8314 Gimsøysand: 68.329891, 14.092439
   $latitude = 68.329891; // North
   $longditude = 14.092439; // East
-  $zenith = 90.58333; // Trial and error to get this right, seems to be a black art.
+  $zenith = 90.58333; // Used trial and error to get this sort of right, it seems to be a black art.
 
-  // Need these below.
+  // We will need these below.
   $year = date('Y', $timestamp);
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
@@ -242,7 +246,6 @@ function print_entire_month($year, $month) {
 
   page_header("Viktun: $year-$month ca kl $monthly_hour hver dag", $previous, $next, $up, $down);
 
-  //print_sunrise_sunset_info($timestamp, $number_of_images != 1);
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, "average");
   print_yesterday_tomorrow_links($timestamp, true);
@@ -324,11 +327,11 @@ function find_latest_image() {
   debug("<br>find_latest_image()<br/>directory: $directory<br/>image: $image");
   $image = get_date_part_of_image_filename($image);
   debug("image (datepart): $image");
-   // Now have 2015120209401201
+   // Now: 2015120209401201
   return $image;
 }
 
-// Gets all images in the directory for a specific day.
+// Gets all images in the directory for a specific day (20151202).
 // ------------------------------------------------------------
 function get_all_images_in_directory($directory) {
   $images = glob("$directory/image-*.jpg");
@@ -348,7 +351,6 @@ function get_lagest_image_in_directory_by_date_hour($directory, $hour) {
 // ------------------------------------------------------------
 function find_first_image_after_time($year, $month, $day, $hour, $minute) {
   debug("<br/>find_first_image_after_time($year, $month, $day, $hour, $minute)");
-
   // Find all images for the specified date and hour (the minutes are checked further below).
   $images = glob("$year$month$day/image-$year$month$day$hour*");
   foreach ($images as $image) {
@@ -374,8 +376,7 @@ function find_first_image_after_time($year, $month, $day, $hour, $minute) {
 // Print a single image, specified by the date part of the filename (no .jpg suffix, no path)
 // ------------------------------------------------------------
 function print_single_image($image_filename) {
-  // 201511281504
-  // or
+  // Works both: 201511281504 and 
   // 2015112815 (minutes are missing if this was arrow-down to get the first image in a month)
   list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
   $timestamp = mktime($hour, $minute, 0, $month, $day, $year);
@@ -409,11 +410,11 @@ function print_single_image($image_filename) {
       debug("Proper filename: $image_filename");
       // We found the image that was passed as a parameter.
       if ($i != 0) {
-	// This was not the first image in the array.
+	// This was not the first image in the array, get the previous one.
 	$previous_image = $images[$i - 1];
       }
       if ($i != count($images)) {
-	// This was not the last image in the array.
+	// This was not the last image in the array, get the next one.
 	$next_image = $images[$i + 1];
       }
       break;
@@ -429,7 +430,7 @@ function print_single_image($image_filename) {
     $next = "?type=one&image=" . get_date_part_of_image_filename($next_image);
   }
   $up = "?type=day&date=" . get_date_part_of_image_filename($image_filename);; // The entire day.
-  $down = false;
+  $down = false; // Already sowing a single image, not possible to go lower.
 
   // What were the minutes again?
   list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
@@ -439,7 +440,6 @@ function print_single_image($image_filename) {
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, false);
   print_entire_day_link($timestamp);
-
   debug("Showing image: $year$month$day/$image_filename");
   print "<p>";
   print "<a href=\"?type=day&date=$year$month$day\">";
@@ -449,10 +449,10 @@ function print_single_image($image_filename) {
   footer();
 }
 
-//function print_sunrise_sunset_info($timestamp, $include_interval) {
+// Print details about the sun, and what images are shown.
+// ------------------------------------------------------------
 function print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, $include_interval) {
   global $monthly_day;
-  //list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print "<p>";
   if ($midnight_sun) {
     print "Midnattsol &#9728; ";
@@ -469,6 +469,8 @@ function print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_su
   print ".</p>\n";
 }
 
+// Find the previous and next month, even for January and December.
+// ------------------------------------------------------------
 function find_previous_and_next_month($year, $month) {
   $month_previous = "";
   $year_previous = $year;
@@ -493,12 +495,12 @@ function find_previous_and_next_month($year, $month) {
 }
 
 
-// Links to yesterday and (possibly) tomrrow.
+// Links to yesterday and (possibly) tomorrow.
 // ------------------------------------------------------------
 function print_yesterday_tomorrow_links($timestamp, $is_entire_month) {
 
   if ($is_entire_month) {
-    // Not links to yesterday and tomorrow, but the the previous and next months.
+    // Not links to yesterday and tomorrow, but the the previous and next months. Easy.
     list($year_previous, $month_previous, $year_next, $month_next) = find_previous_and_next_month(date('Y', $timestamp), date('m', $timestamp));
     print "<p>\nForrige: <a href=\"?type=month&year=$year_previous&month=$month_previous\">$year_previous-$month_previous</a>. \n";
     print "Neste: <a href=\"?type=month&year=$year_next&month=$month_next\">$year_next-$month_next</a>. \n";
@@ -528,7 +530,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_entire_month) {
     $yesterday = strtotime("-1 day", time());
     $yesterday_formatted = date('Y-m-d', $yesterday);
     debug("yesterday_formatted: $yesterday_formatted");
-    // Should we show both "next" and "today" links? Extra detailed, since this was confusint at the time.
+    // Should we show both "next" and "today" links? Extra detailed, since this was confusing at the time.
     if ($yesterday_formatted == date('Y-m-d', $timestamp)) {
       // The day shown was the day before the current day (meaning: yesterday).
     } else if (date('Y-m-d') == date('Y-m-d', $timestamp)) {
@@ -640,7 +642,7 @@ function print_entire_day($timestamp, $image_size, $number_of_images) {
 // Action below
 // ============================================================
 
-// Important variables
+// Important variables and defaults.
 // ------------------------------------------------------------
 date_default_timezone_set("Europe/Oslo"); 
 $timestamp = time();
@@ -654,7 +656,6 @@ $max_images_row = 6;
 
 // Debug: Set the date to something else than today.
 // ------------------------------------------------------------
-//debug(
 if (false) {
   $debug_year = "2015";
   $debug_month = "11";
@@ -672,7 +673,7 @@ if ($_SERVER['QUERY_STRING'] == 1) {
   $type = "day";
   debug("DAY");
 } else {
-  parse_str($_SERVER['QUERY_STRING']);
+  parse_str($_SERVER['QUERY_STRING']); // Scary, but efficient.
   debug("PARSE");
 }
 debug("QUERY_STRING: " . $_SERVER['QUERY_STRING']);

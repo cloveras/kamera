@@ -430,7 +430,7 @@ function print_single_image($image_filename) {
     $next = "?type=one&image=" . get_date_part_of_image_filename($next_image);
   }
   $up = "?type=day&date=" . get_date_part_of_image_filename($image_filename);; // The entire day.
-  $down = false; // Already sowing a single image, not possible to go lower.
+  $down = false; // Already showing a single image, not possible to go lower.
 
   // What were the minutes again?
   list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);

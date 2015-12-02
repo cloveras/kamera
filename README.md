@@ -1,8 +1,8 @@
 # kamera
 
-Generates HTML for image directories created by a web camera: 20151202/image-2015120221560000.jpg (etc).
+Generates HTML for image directories created by a web camera: ./20151202/image-2015120221560000.jpg (etc).
 
-Shows the folowing, depending on the query string:
+Shows the following, depending on the query string:
 * Today's images: empty string, or '?'
 * The latest image: ?1
 * All images for a date: ?day&date=20151202
@@ -11,7 +11,7 @@ Shows the folowing, depending on the query string:
 
 Supports navigation back/forward/up/down with the arrow keys.
 
-The script started as a simple hack, then grew into this.
+The script started as a simple hack, then grew into this much larger and almost maintainable hack.
 ALL HTML is hand coded, and no framework is used. The pages are not responsive, do not support swiping, etc.
 
 Also: All text is hard coded in Norwegian. Nice.

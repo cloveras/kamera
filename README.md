@@ -9,7 +9,7 @@ Shows the following, depending on the query string:
 * All images for a month: ?type=month&year=2015&month=12
 * One specific image: ?type=one&image=2015120213560301 
 
-Sunset, sunrise, dawn and susk are found based on longditude and latitude, and only images between dusk and dawn are shown. 
+Sunset, sunrise, dawn and dusk are found based on latitude and longditude, and only images between dusk and dawn are shown. 
 Midnight sun and polar night is handled (see TODOs).
 
 Supports navigation back/forward/up/down with the arrow keys.

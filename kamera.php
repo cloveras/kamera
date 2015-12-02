@@ -3,16 +3,16 @@
 // ============================================================
 // kamera.php
 //
-// Generates web pages for webcam images located in subdirectories named YYYYMMDD.
-// Assumes filenames like "image-2015120209401201.jpg".
+// Generates HTML for webcam images.
 //
-// The script started as a simple hack, then grew into this.
-// Unfortunately, no framework like Bootstrap is used, and it is not responsive.
-// And all text is hardcoded in Norwegian. Nice.
+// Looks for directories and image files like this:
+// ./20151202/image-2015120209401201.jpg
 //
-// See it in use here: http://superelectric.net/viktun/kamera/
+// The script started as a simple hack, then grew into this bigger hack.
+// Not responsive, not using any framework, and all text is hardcoded.
+// In Norwegian. 
 //
-// Author: Christian Løverås, cl@superelectric.net
+// Have a look: http://superelectric.net/viktun/kamera/
 // ============================================================
 
 
@@ -202,11 +202,10 @@ function find_sun_times($timestamp) {
     $dusk = $sunset;
   } else {
     // Do the math! Use the $timestamp passed as parameter.
-    // TODO: Handle when dawn and dusk occur in the day before and/or after (happes in the summer).
+    // TODO: Handle when dawn and dusk occur in the day before and/or after (happens in the summer).
     $sunrise = date_sunrise($timestamp, SUNFUNCS_RET_TIMESTAMP, $latitude, $longditude, $zenith, 1);
     $sunset = date_sunset($timestamp, SUNFUNCS_RET_TIMESTAMP, $latitude, $longditude, $zenith, 1);
     $dawn = $sunrise - $adjust_dawn_dusk;
-    //$dawn = mktime(11, 0, 0, $month, $day, $year); // Midnight
     $dusk = $sunset + $adjust_dawn_dusk;
   }
   debug("<br/>find_sun_times($timestamp) (" . date('Y-m-d H:i', $timestamp) . ")");
@@ -580,9 +579,6 @@ function print_entire_day($timestamp, $image_size, $number_of_images) {
   
   // Print header now thatw e have the details for it.
   page_header($title, $previous, $next, $up, $down);
-  // TODO: Remove
-  //print_sunrise_sunset_info($timestamp, $number_of_images != 1);
-  //list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, $number_of_images != 1);
   print_small_large_links($timestamp, $size);
   print_yesterday_tomorrow_links($timestamp);

@@ -611,7 +611,7 @@ function print_entire_day($timestamp, $image_size, $number_of_images) {
 	} else {
 	  // Default: Small (25%) without linebreaks.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
-	  print "<img title=\"$hour:$minute\" alt=\$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	  print "<img title=\"$hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
 	}
 	
 	if ($images_row >= $max_images_row) {

@@ -9,8 +9,11 @@ Shows the folowing, depending on the query string:
 * All images for a month: ?type=month&year=2015&month=12
 * One specific image: ?type=one&image=2015120213560301 
 
+Supports navigation back/forward/up/down with the arrow keys.
+
 The script started as a simple hack, then grew into this.
-Unfortunately, no framework like Bootstrap is used, and it is not responsive.
-And all text is hardcoded in Norwegian. Nice.
+ALL HTML is hand coded, and no framework is used. The pages are not responsive, do not support swiping, etc.
+
+Also: All text is hard coded in Norwegian. Nice.
 
 See it in use here: http://superelectric.net/viktun/kamera/

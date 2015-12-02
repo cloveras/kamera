@@ -9,9 +9,16 @@ Shows the following, depending on the query string:
 * All images for a month: ?type=month&year=2015&month=12
 * One specific image: ?type=one&image=2015120213560301 
 
+Sunset, sunrise, dawn and susk are found based on longditude and latitude, and only images between dusk and dawn are shown. 
+Midnight sun and polar night is handled (see TODOs).
+
 Supports navigation back/forward/up/down with the arrow keys.
 
-The script started as a simple hack, then grew into this much larger and almost maintainable hack.
+Uses Google Analytics so you can see how many times you click on your page.
+
+The script started as a simple hack, then grew into this much larger and almost maintainable hack. 
+It is a good candidate for a complete rewrite, if you have the time.
+
 ALL HTML is hand coded, and no framework is used. The pages are not responsive, do not support swiping, etc.
 
 Also: All text is hard coded in Norwegian. Nice.

@@ -8,6 +8,7 @@ Shows the following, depending on the query string:
 * All images for a date: ?type=day&date=20151202
 * All images for a month: ?type=month&year=2015&month=12
 * One specific image: ?type=one&image=2015120213560301 
+* All images for a year (select which days in each month): ?type=year&year=2015
 
 Sunset, sunrise, dawn and dusk are found based on latitude and longditude, and only images between dusk and dawn are shown. 
 Midnight sun and polar night is handled (see TODOs).

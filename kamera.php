@@ -284,12 +284,11 @@ function print_full_month($year, $month) {
   list($year_previous, $month_previous, $year_next, $month_next) = find_previous_and_next_month($year, $month);
   $previous = "?type=month&year=$year_previous&month=$month_previous&size=$size"; // Previous month.
   $next = "?type=month&year=$year_next&month=$month_next&size=$size"; // Next month.
-  $up = false; // Up: Nothing when showing a month.
-  // 20151130
-  // $down = "?type=day&year=$year&month=$month&day=01"; // Down goes to the first day with an image in that month, no hour or minutes needed.
+  $up = "?type=year&year=$year"; // Up: SHow the full year.
+  // Down goes to the first day n this month that has images.
   $first_day_with_images = find_first_day_with_images($year, $month);
   if ($first_day_with_images) {
-    $down = "?type=day&date=" . find_first_day_with_images($year, $month); // Down goes to the first day in that month, no hour or minutes needed.
+    $down = "?type=day&date=" . find_first_day_with_images($year, $month);
   } else {
     $down = false;
   }
@@ -342,6 +341,77 @@ function print_full_month($year, $month) {
   footer($count);
 }
 
+// Print images for a whole year.
+// ------------------------------------------------------------
+function print_full_year($year) {
+  global $size;
+  //$days = array(1, 8, 15, 23); 
+  $days = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31); // I don't have that many images yet..
+  $hour = 11;
+
+  debug("<br/>print_full_year($year)");
+
+  // Find previous and next year, and create the links to them.
+  $previous = "?type=year&year=" . ($year - 1);
+  $next = "?type=year&year=" . ($year + 1);
+  $up = false; 
+  // Down goes to the first month that has images.
+  $down = false;
+  $first_day_with_images = "";
+  for ($month = 1; $month <= 12; $month++) {
+    $month = sprintf("%02d", $month);
+    $first_day_with_images = find_first_day_with_images($year, $month);
+    if ($first_day_with_images) {
+      // We found a month (and also a day, which we don't need now).
+      $down = "?type=month&year=$year&month=$month";
+      break;
+    }
+  }
+
+  //page_header("Viktun: " . count($days) . " bilder for hver måned i hele $year", $previous, $next, $up, $down);
+  page_header("Viktun: Bilder for hver måned i hele $year", $previous, $next, $up, $down);
+
+  // Loop through all months 1-12 and print images for the $days if they exist.
+  $count = 0;
+  $image_datepart = "";
+  $image_filename = "";
+  for ($month = 1; $month <= 12; $month++) {
+    $month = sprintf("%02d", $month);
+    debug("<br/>Checking month: $month");
+
+    // Check for each of the days in the $days array
+    foreach ($days as $day) {
+      $day = sprintf("%02d", $day);
+      // Find first image for that day taken after $hour
+      $image_datepart = find_first_image_after_time($year, $month, $day, $hour, 0);
+      if ($image_datepart) {
+	// Something was found.
+	debug("Found image: $image_datepart");
+	$image_filename = $year . "$month$day/" . "image-" . $image_datepart . ".jpg";
+	debug("Filename: $image_filename");
+	// Print it!
+	if ($size == "small") {
+	  // Print small images.
+	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
+	  print "<img title=\"$year-$month-$day kl $hour\" alt=\"$year-$month-$day kl $hour\" width=\"160\" height=\"120\" src=\"$image_filename\"/></a>\n";
+	} else if ($size == "large") {
+	  // Print large images.
+	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
+	  print "<img title=\"$year-$month-$day kl $hour:$minute\" alt=\"$year-$month-$day kl $hour\" width=\"640\" height=\"480\" src=\"$image\_filename\"/></a><br/>\n";
+	}
+	$count += 1;
+      }
+    }
+  }
+  if ($count == 0) {
+    print "<p>(Ingen bilder å vise for $year)</p>\n"; // No pictures found for this year.
+  }
+  footer($count);
+}
+
+
+
+
 // Print links to small and large images
 // ------------------------------------------------------------
 function print_small_large_links($timestamp, $size) {
@@ -388,7 +458,7 @@ function get_all_images_in_directory($directory) {
   return $images;
 }
 
-// Gets all images in the directory for a specific day.
+// Gets all images in the directory for a specific day. Returns date part: 2015120209401201 .
 // ------------------------------------------------------------
 function get_latest_image_in_directory_by_date_hour($directory, $hour) {
   $images = glob("$directory/image-$directory$hour*.jpg");
@@ -752,6 +822,9 @@ if ($type == "last") {
   if ($month && $year) {
     print_full_month($year, sprintf("%02d", $month), $monthly_hour, $size); 
   }
+} else if ($type == "year") {
+  // The full year, actually. Not all images, though.
+  print_full_year($year);
 } else {
   // Unknown type.
   page_header("Feil", false, false, false, false);

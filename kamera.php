@@ -1,6 +1,6 @@
 <?php
 
-// ============================================================
+/* ============================================================
 // kamera.php
 //
 // Generates HTML for webcam images.
@@ -11,9 +11,8 @@
 // Finds sunrise, sunset, dawn and dusk, only shows images taken between dawn and dusk. 
 // Handles midnight sun and polar night.
 //
-// The script started as a simple hack, then grew into this bigger hack.
-// Not responsive, not using any framework, and all text is hardcoded.
-// In Norwegian. 
+// The script started as a simple hack, then grew into this much larger and almost 
+// maintainable hack. It is a good candidate for a complete rewrite, if you have the time.
 //
 // Code: https://github.com/cloveras/kamera
 //
@@ -27,9 +26,10 @@
 // * Check the dates in functions midnight_sun() and polar_night().
 // * Set the locale, whith is used for printing month names.
 // * Change the (hardcoded) text shown on the pages (not a lot, but some).
+// * Change the Google Analytics id.
 // * For surprisingly verbose feedback for debugging: $debug = 1
 //
-// ============================================================
+============================================================ */
 
 
 // Functions
@@ -676,7 +676,7 @@ $size = "small";
 $type = "day";
 $monthly_day = 1; // The day to use for full month view.
 $monthly_hour = 11; // Time to use when showing full months.
-$max_images = 1000; // Use 1000 unless anything else is specified.
+$max_images = 1000; // Unless we are showing less.
 $max_images_row = 6;
 
 // Debug: Set the date to something else than today.

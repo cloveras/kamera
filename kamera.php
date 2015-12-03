@@ -12,9 +12,12 @@
 // Not responsive, not using any framework, and all text is hardcoded.
 // In Norwegian. 
 //
-// For surprisingly verbose feedback for debugging, etc: $debug = 1
+// For surprisingly verbose feedback for debugging: $debug = 1
 //
 // Have a look: http://superelectric.net/viktun/kamera/
+//
+// Code: https://github.com/cloveras/kamera
+//
 // ============================================================
 
 
@@ -244,7 +247,8 @@ function print_entire_month($year, $month) {
   $second = 0;
   $timestamp = mktime($monthly_hour, 0, 0, $month, $monthly_day, $year); // Using the $monthly_day as average.
 
-  page_header("Viktun: $year-$month ca kl $monthly_hour hver dag", $previous, $next, $up, $down);
+  $title = "Viktun: " . ucwords(strftime("%B %Y ca kl %H hver dag", $timestamp), "§"); // § Uppercase month, but nothing else.
+  page_header($title, $previous, $next, $up, $down);
 
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, "average");
@@ -436,7 +440,8 @@ function print_single_image($image_filename) {
   list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
 
   // Print!
-  page_header("Viktun: $year-$month-$day $hour:$minute", $previous, $next, $up, $down);
+  $title = "Viktun: " . strtolower(strftime("%e. %B %Y kl %H:%M", mktime($hour, $minute, $seconds, $month, $day, $year)));
+  page_header($title, $previous, $next, $up, $down);
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, false);
   print_entire_day_link($timestamp);
@@ -568,18 +573,18 @@ function print_entire_day($timestamp, $image_size, $number_of_images) {
   
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   
-  // Print header and navigation.
-  $title = "Viktun: " . date('Y-m-d', $timestamp);
-  if ($number_of_images == 1) {
-    // Just the latest image, then include hour and minute too.
-    $title .= " " . date('H', $timestamp) . ":" . date('i', $timestamp);
-  }
+  // Set the navigation (we need $dusk from above).
   $previous = "?type=day&date=" . date('Ymd', $timestamp - 60 * 60 * 24) . "&size=$size"; // The previous day.
   $next = "?type=day&date=" . date('Ymd', $timestamp + 60 * 60 * 24) . "&size=$size"; // The next day.
   $up = "?type=month&year=" . date('Y', $timestamp) . "&month=" . date('m', $timestamp); // Entire month.
   $down = "?type=one&image=" . date('Ymd', $timestamp) . date('H', $dawn); // First image this day (no minutes, as image may not be taken exactly at dawn).
   
-  // Print header now thatw e have the details for it.
+  // Print header now that we have the details for it.
+  $title = "Viktun: " . strtolower(strftime("%e. %B %Y", $timestamp));
+  if ($number_of_images == 1) {
+    // Just the latest image, so include hour and minute too.
+    $title .= " " . date('H', $timestamp) . ":" . date('i', $timestamp);
+  }
   page_header($title, $previous, $next, $up, $down);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, $number_of_images != 1);
   print_small_large_links($timestamp, $size);
@@ -596,7 +601,7 @@ function print_entire_day($timestamp, $image_size, $number_of_images) {
       $image_datepart = get_date_part_of_image_filename($image); // Get the "2015112319140001" part.
       list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_datepart); // Split into variables.
       // Create timestamp top check if this image is from between dawn and dusk.
-      $image_timestamp = mktime($hour, $minute, substr($seconds, 0, 2), $month, $day, $year); // Skip fractions of seconds.
+      $image_timestamp = mktime($hour, $minute, substr($seconds, 0, 2), $month, $day, $year); // Skip the subseconds.
       debug("image_timestamp = mktime($hour, $minute, " . substr($seconds, 0, 2) . ", $month, $day, $year)");
       debug("image_timestamp: $image_timestamp<br/>dawn: $dawn<br/>dusk: $dusk");
       if (($image_timestamp <= $dusk) && ($image_timestamp >= $dawn)) {
@@ -644,6 +649,7 @@ function print_entire_day($timestamp, $image_size, $number_of_images) {
 
 // Important variables and defaults.
 // ------------------------------------------------------------
+setlocale(LC_ALL,'no_NO');
 date_default_timezone_set("Europe/Oslo"); 
 $timestamp = time();
 $debug = 0;

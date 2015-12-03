@@ -140,13 +140,12 @@ function debug($txt) {
 // Footer
 // ------------------------------------------------------------
 function footer($count) {
-  print "\n<p>";
+  print "\n<p>Bruk piltastene for å navigere forover (&#9654;), bakover (&#9664;), opp (&#9650;) og ned (&#9660;).</p>\n\n<p>\n";
   if ($count > 0) {
-    print "<a href=\"#\">Til toppen</a>. "; // Include link to top of page only if this is a "long" page.
+    print "<a href=\"#\">Til toppen</a>.\n"; // Include link to top of page only if this is a "long" page.
   }
-  print "<p>Bruk piltastene for å navigere forover (&#9654;) og bakover (&#9664;). Og opp (&#9650;) og ned (&#9660;).</p>\n";
   print "<a href=\"http://www.lookr.com/lookout/1448496177-Lofoten\">Lookr: time-lapse</a>. \n";
-  print "<p><a href=\"../\">Viktun</a></p>\n";
+  print "<a href=\"../\">Viktun</a>\n</p>\n\n";
   print "</body>\n</html>\n";
 }
 
@@ -332,12 +331,12 @@ function print_small_large_links($timestamp, $size) {
   $day = date('d', $timestamp);
   print "<p>\n";
   if ($size == "large" || $size = "") { // Link to small if we showed large, or don't know.
-    print "<a href=\"?type=day&date=$year$month$day&size=small\">Små bilder</a>.\n";
+    print "<a href=\"?type=day&date=$year$month$day&size=small\">Små bilder</a>.";
   }
   if ($size == "small" || $size == "") { // Links to large if we showed small, or don't know.
-    print "<a href=\"?type=day&date=$year$month$day&size=large\">Store bilder</a>.\n";
+    print "<a href=\"?type=day&date=$year$month$day&size=large\">Store bilder</a>.";
   }
-  print "\n</p>";
+  print "</p>\n\n";
 }
 
 // Returns only the date part of an image filename (removes directory "image-" and ".jpg").
@@ -504,7 +503,7 @@ function print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_su
   } else if ($include_interval == "average") {
     print " (beregnet for den $monthly_day. i måneden)";
   }
-  print ".</p>\n";
+  print ".</p>\n\n";
 }
 
 // Find the previous and next month, even for January and December.
@@ -554,7 +553,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
     // Work hard to find the days.
     // Yesterday always exists.
     $yesterday_timestamp = $timestamp - 60 * 60 * 24;
-    print "<p>Forrige: <a href=\"?type=day&date=" . date('Ymd', $yesterday_timestamp) . "&size=$size\">" . date('Y-m-d', $yesterday_timestamp) . "</a>.\n";
+    print "<p>\nForrige: <a href=\"?type=day&date=" . date('Ymd', $yesterday_timestamp) . "&size=$size\">" . date('Y-m-d', $yesterday_timestamp) . "</a>.\n";
     // Is there a tomorrow?
     $tomorrow_timestamp = $timestamp + 60 * 60 * 24;
     if (date('Y-m-d', $tomorrow_timestamp) > date('Y-m-d')) {

@@ -42,18 +42,31 @@ function page_header($title, $previous, $next, $up, $down) {
 
   print <<<END1
 <!DOCTYPE html>
-<html lang="no_NO">
+<html lang="en-US">
 <head>
   <meta charset="utf-8">
-  <meta name="generator" content="kamera.php: https://github.com/cloveras/kamera">
   <meta name="description" content="Web camera with view towards west from Hov, Gimsøya, Lofoten, Norway.">
   <meta name="keywords" content="webcam,webcamera,hov,gimsøya,lofoten,nordland,norway">
   <meta name="robot" content="index, nofollow" />
+  <meta name="generator" content="kamera.php: https://github.com/cloveras/kamera">
   <meta name="author" content="Christian Løverås">
   <link rel="stylesheet" type="text/css" href="/style.css" />
   <link rel="stylesheet" type="text/css" href="/style-viktun.css" />
-  <title>$title</title>
+
 END1;
+
+  if ($previous) {
+    print "  <link rel=\"prev\" title=\"Previous\" href=\"http://" . $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME'] . "$previous\" />\n";
+  }
+  if ($next) {
+    print "  <link rel=\"next\" title=\"Next\" href=\"http://" . $_SERVER['SERVER_NAME'] . $_SERVER['SCRIPT_NAME'] . "$next\" />\n";
+  }
+
+  print <<<END2
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>$title</title>
+END2;
 
   // Javascript for navigation using arrow keys. Only print the ones that do something.
   print "\n\n<!-- Javascript for navigation using arrow keys. -->\n";
@@ -107,7 +120,7 @@ END1;
 
   // Print the rest of the top of the page, including page title.
   // Remember to change the Google Analytics id.
-print<<<END2
+print<<<END3
 </head>
 <body>
 
@@ -124,7 +137,7 @@ ga('send', 'pageview');
 <h1>$title</h1>
 
 
-END2;
+END3;
 }
 
 // Debug
@@ -589,7 +602,7 @@ function print_full_day_link($timestamp) {
   $year= date('Y', $timestamp);
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
-  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen ($year-$month-$day)</a>.</p>\n"; 
+  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen ($year-$month-$day)</a>.</p>\n\n"; 
 }
 
 

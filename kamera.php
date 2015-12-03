@@ -439,6 +439,23 @@ function get_date_part_of_image_filename($image_filename) {
   return $image_filename;
 }
 
+// Finds the latest "*jpg" file in the newsst "2*" directory. Returns only date part of filename.
+// ------------------------------------------------------------
+function find_latest_image() {
+  // Find newest directory with the right name format
+  $directories = array_reverse(glob("2*")); // Get the latest first. 2* works until the year 3000.
+  $directory = $directories[0];
+  // Find newest image in the newest directory
+  $images = array_reverse(glob("$directory/image*jpg")); // Get the latest *jpg file in the directory.
+  // Getting 20151202/image-2015120209401201.jpg
+  $image = $images[0];
+  debug("<br>find_latest_image()<br/>directory: $directory<br/>image: $image");
+  $image = get_date_part_of_image_filename($image);
+  debug("image (datepart): $image");
+   // Now: 2015120209401201
+  return $image;
+}
+
 // Finds the first day with images for a specific year and month. Returns only date part of filename.
 // ------------------------------------------------------------
 function find_first_day_with_images($year, $month) {
@@ -766,7 +783,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 // ------------------------------------------------------------
 setlocale(LC_ALL,'no_NO');
 date_default_timezone_set("Europe/Oslo"); 
-$timestampx = time();
+$timestamp = time();
 $debug = 0;
 $size = "small";
 $type = "day";

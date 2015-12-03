@@ -166,7 +166,6 @@ function footer($count) {
 // Get variables from the date part of the image filename.
 // ------------------------------------------------------------
 function split_image_filename($image_filename) {
-  // $image = $image_filename;
   $image_filename = preg_replace('/^.*image-/', '', $image_filename); // Remove everything up to and including the '/'.
   $image_filename = preg_replace('/.jpg/', '', $image_filename); // Remove the .jpg suffix.
   debug("<br/>split_image_filename($image_filename): ");
@@ -409,9 +408,6 @@ function print_full_year($year) {
   footer($count);
 }
 
-
-
-
 // Print links to small and large images
 // ------------------------------------------------------------
 function print_small_large_links($timestamp, $size) {
@@ -512,8 +508,8 @@ function find_first_image_after_time($year, $month, $day, $hour, $minute) {
 // Print a single image, specified by the date part of the filename (no .jpg suffix, no path)
 // ------------------------------------------------------------
 function print_single_image($image_filename) {
-  // Works both: 201511281504 and 
-  // 2015112815 (minutes are missing if this was arrow-down to get the first image in a month)
+  // Works for  both: 201511281504 and 2015112815 
+  // (minutes are missing if this was arrow-down to get the first image in a month)
   list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
   $timestamp = mktime($hour, $minute, 0, $month, $day, $year);
 
@@ -631,7 +627,6 @@ function find_previous_and_next_month($year, $month) {
   return array($year_previous, $month_previous, $year_next, $month_next);
 }
 
-
 // Links to yesterday and (possibly) tomorrow.
 // ------------------------------------------------------------
 function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
@@ -692,11 +687,9 @@ function print_full_day_link($timestamp) {
   print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen ($year-$month-$day)</a>.</p>\n\n"; 
 }
 
-
 // Print all images in a diretory, between dawn and dusk, with small/large size, optionally limited by a number.
 // ------------------------------------------------------------
 function print_full_day($timestamp, $image_size, $number_of_images) {
-  global $max_images_row;
   global $size;
   
   // Get all *jpg images in "today's" image directory.
@@ -723,7 +716,6 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   print_yesterday_tomorrow_links($timestamp);
   
   $count = 0;
-  $images_row = 0;
   debug("Getting images from directory: <a href=\"$directory\">$directory</a>");
   if (file_exists($directory)) {
     $images = glob("$directory/*.jpg");
@@ -749,11 +741,6 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 	  // Default: Small (25%) without linebreaks.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
 	  print "<img title=\"$hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
-	}
-	
-	if ($images_row >= $max_images_row) {
-	  print "<br/>\n";
-	  $images_row = 0;
 	}
 	
 	if ($number_of_images == 1) {
@@ -790,7 +777,6 @@ $type = "day";
 $monthly_day = 1; // The day to use for full month view.
 $monthly_hour = 11; // Time to use when showing full months.
 $max_images = 1000; // Unless we are showing less.
-$max_images_row = 6;
 
 // Debug: Set the date to something else than today.
 // ------------------------------------------------------------

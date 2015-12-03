@@ -278,20 +278,26 @@ function print_full_month($year, $month) {
   global $monthly_day;
   global $monthly_hour;
 
-  debug("print_full_month($year, $month)");
+  debug("<br/>print_full_month($year, $month)");
 
   // Find previous and next month, and create the links to them.
   list($year_previous, $month_previous, $year_next, $month_next) = find_previous_and_next_month($year, $month);
   $previous = "?type=month&year=$year_previous&month=$month_previous&size=$size"; // Previous month.
   $next = "?type=month&year=$year_next&month=$month_next&size=$size"; // Next month.
   $up = false; // Up: Nothing when showing a month.
-  $down = "?type=day&year=$year&month=$month&day=01"; // Down goes to the first day in that month, no hour or minutes needed.
+  // 20151130
+  // $down = "?type=day&year=$year&month=$month&day=01"; // Down goes to the first day with an image in that month, no hour or minutes needed.
+  $first_day_with_images = find_first_day_with_images($year, $month);
+  if ($first_day_with_images) {
+    $down = "?type=day&date=" . find_first_day_with_images($year, $month); // Down goes to the first day in that month, no hour or minutes needed.
+  } else {
+    $down = false;
+  }
 
   // Make timestamp for this month.
   $minute = 0;
   $second = 0;
   $timestamp = mktime($monthly_hour, 0, 0, $month, $monthly_day, $year); // Using the $monthly_day as average.
-
   $title = "Viktun: " . ucwords(strftime("%B %Y ca kl %H hver dag", $timestamp), "§"); // § Uppercase month, but nothing else.
   page_header($title, $previous, $next, $up, $down);
 
@@ -308,7 +314,7 @@ function print_full_month($year, $month) {
      if (file_exists($directory)) {
        debug("Directory exists: $directory");
       // Getting the latest image in that directory for that hour.
-      $image = get_lagest_image_in_directory_by_date_hour($directory, $monthly_hour);
+      $image = get_latest_image_in_directory_by_date_hour($directory, $monthly_hour);
       if ($image) {
 	debug("Image found: $image");
 	// There was at least one image: 20151127/image-2015112700003401.jpg
@@ -363,21 +369,15 @@ function get_date_part_of_image_filename($image_filename) {
   return $image_filename;
 }
 
-// Finds the latest "*jpg" file in the newsst "2*" directory. Returns only date part of filename.
+// Finds the first day with images for a specific year and month. Returns only date part of filename.
 // ------------------------------------------------------------
-function find_latest_image() {
+function find_first_day_with_images($year, $month) {
   // Find newest directory with the right name format
-  $directories = array_reverse(glob("2*")); // Get the latest first. 2* works until the year 3000.
-  $directory = $directories[0];
-  // Find newest image in the newest directory
-  $images = array_reverse(glob("$directory/image*jpg")); // Get the latest *jpg file in the directory.
-  // Getting 20151202/image-2015120209401201.jpg
-  $image = $images[0];
-  debug("<br>find_latest_image()<br/>directory: $directory<br/>image: $image");
-  $image = get_date_part_of_image_filename($image);
-  debug("image (datepart): $image");
-   // Now: 2015120209401201
-  return $image;
+  debug("<br/>find_first_day_with_images($year, $month)");
+  $directories = glob("$year$month*"); // Get the first first. 2* works until the year 3000.
+  $directory = $directories[0]; // This is the first one in that month.
+  debug("First day with images: $directory");
+  return $directory;
 }
 
 // Gets all images in the directory for a specific day (20151202).
@@ -390,9 +390,9 @@ function get_all_images_in_directory($directory) {
 
 // Gets all images in the directory for a specific day.
 // ------------------------------------------------------------
-function get_lagest_image_in_directory_by_date_hour($directory, $hour) {
+function get_latest_image_in_directory_by_date_hour($directory, $hour) {
   $images = glob("$directory/image-$directory$hour*.jpg");
-  debug("<br/>get_lagest_image_in_directory_by_date_hour($directory, $hour)<br/>Found " . count($images) . "images, returning " . $images[0]);
+  debug("<br/>get_latest_image_in_directory_by_date_hour($directory, $hour)<br/>Found " . count($images) . "images, returning " . $images[0]);
   return $images[0];
 }
 
@@ -696,7 +696,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 // ------------------------------------------------------------
 setlocale(LC_ALL,'no_NO');
 date_default_timezone_set("Europe/Oslo"); 
-$timestamp = time();
+$timestampx = time();
 $debug = 0;
 $size = "small";
 $type = "day";

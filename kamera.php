@@ -1,6 +1,7 @@
 <?php
 
 /* ============================================================
+//
 // kamera.php
 //
 // Generates HTML for webcam images.

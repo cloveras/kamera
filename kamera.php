@@ -228,12 +228,25 @@ function find_sun_times($timestamp) {
     $dusk = $sunset;
   } else {
     // Do the math! Use the $timestamp passed as parameter.
-    // TODO: Handle when dawn and dusk occur in the day before and/or after (happens in the summer).
     $sunrise = date_sunrise($timestamp, SUNFUNCS_RET_TIMESTAMP, $latitude, $longditude, $zenith, 1);
     $sunset = date_sunset($timestamp, SUNFUNCS_RET_TIMESTAMP, $latitude, $longditude, $zenith, 1);
     $dawn = $sunrise - $adjust_dawn_dusk;
     $dusk = $sunset + $adjust_dawn_dusk;
   }
+
+  // At the beginning and end of the midnight sun and polar night periods, the sun may rise/set the day before/after.
+  $day_start = mktime(0, 0, 0, date('m', $timestamp), date('d', $timestamp), date('Y', $timestamp)); // 00:00:00
+  $day_end = mktime(23, 59, 59, date('m', $timestamp), date('d', $timestamp), date('Y', $timestamp)); // 23:59:59
+  // Check if dawn/dusk are have been set too early/late above, and reset to start/end of day.
+  if ($sunrise - $adjust_dawn_dusk < $day_start) {
+    // The time from 00:00:00 to sunrise is less than the adjustment time. Set dawn to start of day.
+    $dawn = $day_start;
+  }  
+  if ($sunset + $adjust_dawn_dusk > $day_end) {
+    // The time from sunset to 23:59:59 is less than the adjustment time. Set dusk to end of day.
+    $dusk = $day_end;
+  }
+
   debug("<br/>find_sun_times($timestamp) (" . date('Y-m-d H:i', $timestamp) . ")");
   debug("dawn: $dawn (" . date('Y-m-d H:i', $dawn) . ")");
   debug("sunrise: $sunrise (" . date('Y-m-d H:i', $sunrise) . ")");
@@ -479,7 +492,7 @@ function print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_su
   global $monthly_day;
   print "<p>";
   if ($midnight_sun) {
-    print "Midnattsol &#9728; ";
+    print "Midnattsol &#9728;";
   } else if ($polar_night) {
     print "Mørketid";
   } else {

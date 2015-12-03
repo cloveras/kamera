@@ -305,7 +305,7 @@ function print_full_month($year, $month) {
      }
   }
   if ($count == 0) {
-    print "(Ingen bilder å vise for $year-$month)</p>\n"; // No pictures found for this month.
+    print "<p>(Ingen bilder å vise for " .  strftime("%B %Y", $timestamp) . ")</p>\n"; // No pictures found for this month.
   }
   footer($count);
 }
@@ -535,7 +535,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
     if ($requested_month != $this_month) {
       print "<a href=\"?type=month&year=" . date('Y') . "&month=" . date('m') . "\">Denne: $this_month</a>. \n";
     }
-    print "<a href=\"" . $_SERVER['SCRIPT_NAME'] . "\">I dag</a>. \n";
+    print "<a href=\"?\">I dag</a>. \n";
   } else {
     // Work hard to find the days.
     // Yesterday always exists.
@@ -561,7 +561,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
       // The day shown was the current date.
     } else {
       // The day shown was the day before yesterday, or earlier.
-      print "<a href=\"" . $_SERVER['SCRIPT_NAME'] . "\">I dag</a>.\n";
+      print "<a href=\"?\">I dag</a>.\n";
     }
     // Link to the full month at 13:00
     //------------------------------------------------------------
@@ -658,7 +658,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
     }
   }
   if ($count == 0) {
-    print "(Ingen bilder å vise for " . date('Y-m-d', $timestamp)  . ")</p>\n";
+    print "<p>(Ingen bilder å vise for " .  strftime("%e. %B %Y", $timestamp) . ")</p>\n"; // No pictures found for this day.
   }
   footer($count);
 }

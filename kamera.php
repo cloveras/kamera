@@ -596,7 +596,9 @@ function print_single_image($image_filename) {
   print_full_day_link($timestamp);
   print "<p>";
   print "<a href=\"$previous\">Forrige (" . substr($previous_datepart, 8, 2) . ":" . substr($previous_datepart, 10, 2) . ")</a>.\n";
-  print "<a href=\"$next\">Neste (" . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . ")</a>.\n";
+  if ($next_datepart) {
+    print "<a href=\"$next\">Neste (" . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . ")</a>.\n";
+  }
   debug("Showing image: $year$month$day/$image_filename");
   print "<p>";
   print "<a href=\"?type=day&date=$year$month$day\">";

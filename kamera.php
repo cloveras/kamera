@@ -69,54 +69,56 @@ END1;
 END2;
 
   // Javascript for navigation using arrow keys. Only print the ones that do something.
-  print "\n\n<!-- Javascript for navigation using arrow keys. -->\n";
-  if ($previous) {
+  if ($previous || $next || $up || $down) {
+    print "\n\n<!-- Javascript for navigation using arrow keys. -->\n";
     print "<script>\n";
-    print "  function leftArrowPressed() {\n";
-    print "    window.location.href=\"$previous\";\n";
-    print "  }\n\n";
+    if ($previous) {
+      print "  function leftArrowPressed() {\n";
+      print "    window.location.href=\"$previous\";\n";
+      print "  }\n\n";
+    }
+    if ($next) {
+      print "  function rightArrowPressed() {\n";
+      print "    window.location.href=\"$next\";\n";
+      print "  }\n\n";
+    }
+    if ($up) {
+      print "  function upArrowPressed() {\n";
+      print "    window.location.href=\"$up\";\n";
+      print "  }\n\n";
+    }
+    if  ($down) {
+      print "  function downArrowPressed() {\n";
+      print "    window.location.href=\"$down\";\n";
+      print "  }\n\n";
+    }
+    print "  document.onkeydown = function(evt) {\n";
+    print "    evt = evt || window.event;\n";
+    print "      switch (evt.keyCode) {\n";
+    if ($previous) {
+      print "        case 37:\n";
+      print "          leftArrowPressed();\n";
+      print "          break;\n";
+    }
+    if ($up) {
+      print "        case 38:\n";
+      print "          upArrowPressed();\n";
+      print "          break;\n";
+    }
+    if ($next) {
+      print "        case 39:\n";
+      print "          rightArrowPressed();\n";
+      print "          break;\n";
+    }
+    if ($down) {
+      print "        case 40:\n";
+      print "          downArrowPressed();\n";
+      print "          break;\n";
+    }
+    print "      }\n";
+    print "    };\n";
+    print "</script>\n\n";
   }
-  if ($next) {
-    print "  function rightArrowPressed() {\n";
-    print "    window.location.href=\"$next\";\n";
-    print "  }\n\n";
-  }
-  if ($up) {
-    print "  function upArrowPressed() {\n";
-    print "    window.location.href=\"$up\";\n";
-    print "  }\n\n";
-  }
-  if  ($down) {
-    print "  function downArrowPressed() {\n";
-    print "    window.location.href=\"$down\";\n";
-    print "  }\n\n";
-  }
-  print "  document.onkeydown = function(evt) {\n";
-  print "    evt = evt || window.event;\n";
-  print "      switch (evt.keyCode) {\n";
-  if ($previous) {
-    print "        case 37:\n";
-    print "          leftArrowPressed();\n";
-    print "          break;\n";
-  }
-  if ($up) {
-    print "        case 38:\n";
-    print "          upArrowPressed();\n";
-    print "          break;\n";
-  }
-  if ($next) {
-    print "        case 39:\n";
-    print "          rightArrowPressed();\n";
-    print "          break;\n";
-  }
-  if ($down) {
-    print "        case 40:\n";
-    print "          downArrowPressed();\n";
-    print "          break;\n";
-  }
-  print "      }\n";
-  print "    };\n";
-  print "</script>\n\n";
 
   // Print the rest of the top of the page, including page title.
   // Remember to change the Google Analytics id.
@@ -168,7 +170,6 @@ function footer($count) {
 function split_image_filename($image_filename) {
   $image_filename = preg_replace('/^.*image-/', '', $image_filename); // Remove everything up to and including the '/'.
   $image_filename = preg_replace('/.jpg/', '', $image_filename); // Remove the .jpg suffix.
-  debug("<br/>split_image_filename($image_filename): ");
   // 2015120209401201
   // YYYYMMDDHHMMSSFF
   $year = substr($image_filename, 0, 4);
@@ -177,7 +178,7 @@ function split_image_filename($image_filename) {
   $hour = substr($image_filename, 8, 2);
   $minute = substr($image_filename, 10, 2);
   $seconds = substr($image_filename, 12, 4);
-  debug("$year-$month-$day $hour:$minute:$seconds");
+  debug("<br/>split_image_filename($image_filename): $year-$month-$day $hour:$minute:$seconds");
   return array($year, $month, $day, $hour, $minute, $seconds);
 }
 
@@ -382,7 +383,6 @@ function print_full_year($year) {
   for ($month = 1; $month <= 12; $month++) {
     $month = sprintf("%02d", $month);
     debug("<br/>Checking month: $month");
-
     // Check for each of the days in the $days array
     foreach ($days as $day) {
       $day = sprintf("%02d", $day);
@@ -486,18 +486,25 @@ function get_latest_image_in_directory_by_date_hour($directory, $hour) {
 
 // Find the first image after a given time. Used when going to the first image in a day.
 // ------------------------------------------------------------
-function find_first_image_after_time($year, $month, $day, $hour, $minute) {
-  debug("<br/>find_first_image_after_time($year, $month, $day, $hour, $minute)");
+function find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds) {
+  debug("<br/>find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds)"); 
   // Find all images for the specified date and hour (the minutes are checked further below).
   $images = glob("$year$month$day/image-$year$month$day$hour*");
+  debug("Looking in directory: $year$month$day/image-$year$month$day$hour*");
+  // Check if minutes are after the minutes passed as parameter (do not return a "too early" image).
   foreach ($images as $image) {
-    // Check if minutes are after the minutes passed as parameter (do not return a "too early" image).
+    debug("Now checking $image");
+    // Get the date info for this image.
     list($year_split, $month_split, $day_split, $hour_split, $minute_split, $seconds_split) = split_image_filename($image);
-    if ("$hour$minute_split" >= "$hour$minute") {       
-      debug("Success: $image");
+    $seconds_split = substr($seconds_split, 0, 2); // Subseconds are not needed.
+    if ("$hour$minute_split$seconds_split" >= "$hour$minute$seconds") { 
+      // The image we are checking is taken after the time passed as parameter.
+      $image = "$year$month$day$hour$minute_split$seconds_split";
+      debug("Success ($hour:$minute_split:$seconds_split >= $hour:$minute:$seconds): New image name: $image");
       break; // Success! This image was taken after the hour and minute passed as parameter.
     } else if ($hour_split > $hour) { 
       $image = ""; // We have tried all images taken that hour.
+      debug("No image found for that hour, and all have been checked: $hour_split > $hour");
       break;
     }
   }
@@ -513,27 +520,30 @@ function find_first_image_after_time($year, $month, $day, $hour, $minute) {
 // Print a single image, specified by the date part of the filename (no .jpg suffix, no path)
 // ------------------------------------------------------------
 function print_single_image($image_filename) {
-  // Works for  both: 201511281504 and 2015112815 
-  // (minutes are missing if this was arrow-down to get the first image in a month)
+  // Works for 201511281504 and 2015112815 (minutes missing if this was arrow-down to get the first image)
+
+  debug("<br/>print_single_image($image_filename)");
+
+  if (strlen($image_filename) < strlen("YYYYMMDDHHMMSSSS")) {
+    // We do not have the hour or the minutes. This is the first image in a day (arrow-down from full day).
+    debug("Short filename! No seconds. Will find dawn and use minutes from there.");
+    // Making timestamp, then finding dawn for this day.
+    list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
+    $timestamp = mktime($hour, $minute, 0, $month, $day, $year); // Using 0 for minutes to get the one(s) before too.
+    // Find out when dawn is.
+    list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
+    // We now have dawn. Find the first image after dawn, using the hours and minutes and even seconds.
+    $image_filename = find_first_image_after_time($year, $month, $day, $hour, date('i', $dawn), date('s', $dawn));
+    debug("Filename fixed (added minutes:" . date('i', $dawn) . " and seconds:" . date('s', $dawn) . "): $image_filename");
+  } else {
+    debug("Filename was ok (minutes in filename): $image_filename");
+  }
+  // We have the full filename, with minutes.
   list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
   $timestamp = mktime($hour, $minute, 0, $month, $day, $year);
 
   // Get previous and next image: First get all images for the same day as the images passed as parameter.
   $directory = "$year$month$day";
-  debug("<br/>print_single_image($image_filename)");
-
-  if (strlen($image_filename) < strlen("YYYYMMDDHHMMSSSS")) {
-    // We do not have the hour or the minutes. This is the first image in a day (arrow-down from full day).
-    // Fix that below in the foreach() loop.
-    debug("Short filename! No seconds. Will find dawn and use minutes from there.");
-    // Need to find out when dawn is.
-    list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
-    $image_filename = find_first_image_after_time($year, $month, $day, $hour, date('i', $dawn)); // Minutes from dawn.
-    debug("Filename fixed: $image_filename");
-  } else {
-    debug("Filename was ok: $image_filename");
-  }
-  
   // Loop through all images in this day's directory and look for the one passed as parameter.
   $images = get_all_images_in_directory($directory);
   $previous_image = false;
@@ -544,7 +554,7 @@ function print_single_image($image_filename) {
       // We found the one passed as paramter, now get previous and next.
       debug("MATCH: $image_filename == $images[$i]");
       $image_filename = "image-" . get_date_part_of_image_filename($images[$i]) . ".jpg";
-      debug("Proper filename: $image_filename");
+      debug("Full name of found file: $image_filename");
       // We found the image that was passed as a parameter.
       if ($i != 0) {
 	// This was not the first image in the array, get the previous one.
@@ -561,19 +571,20 @@ function print_single_image($image_filename) {
 
   // Links to previous, next, up, down.
   if ($previous_image) {
-    $previous = "?type=one&image=" . get_date_part_of_image_filename($previous_image);
+    $previous = "?type=one&image=" . get_date_part_of_image_filename($previous_image); // Only date for the link.
   }
   if ($next_image) {
-    $next = "?type=one&image=" . get_date_part_of_image_filename($next_image);
+    $next = "?type=one&image=" . get_date_part_of_image_filename($next_image); // Only date for the link.
   }
   $up = "?type=day&date=" . get_date_part_of_image_filename($image_filename);; // The full day.
   $down = false; // Already showing a single image, not possible to go lower.
 
-  // What were the minutes again?
-  list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_filename);
-
   // Print!
-  $title = "Viktun: " . strtolower(strftime("%e. %B %Y kl %H:%M", mktime($hour, $minute, $seconds, $month, $day, $year)));
+  if ($timestamp) {
+    $title = "Viktun: " . strtolower(strftime("%e. %B %Y kl %H:%M", $timestamp));
+  } else {
+    $title = "Viktun: Too early.";
+  }
   page_header($title, $previous, $next, $up, $down);
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, false);

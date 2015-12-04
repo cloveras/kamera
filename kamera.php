@@ -387,7 +387,7 @@ function print_full_year($year) {
     foreach ($days as $day) {
       $day = sprintf("%02d", $day);
       // Find first image for that day taken after $hour
-      $image_datepart = find_first_image_after_time($year, $month, $day, $hour, 0);
+      $image_datepart = find_first_image_after_time($year, $month, $day, $hour, 0, 0);
       if ($image_datepart) {
 	// Something was found.
 	debug("Found image: $image_datepart");
@@ -436,7 +436,7 @@ function get_date_part_of_image_filename($image_filename) {
   // Full image filename: 20151202/image-2015120210451101.jpg
   $image_filename = preg_replace("/^.*image-/", '', $image_filename); // Remove everything up to and including the '/'.
   $image_filename = preg_replace('/.jpg/', '', $image_filename); // Remove the .jpg suffix.
-  debug("$image_filename");
+  debug("datepart: $image_filename");
   return $image_filename;
 }
 
@@ -486,7 +486,13 @@ function get_latest_image_in_directory_by_date_hour($directory, $hour) {
 
 // Find the first image after a given time. Used when going to the first image in a day.
 // ------------------------------------------------------------
-function find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds) {
+function find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds) {  
+  if ($minute < 10) {
+    $minute = sprintf("%02d", $minute);
+  }
+  if ($seconds < 10) {
+    $seconds = sprintf("%02d", $seconds);
+  }
   debug("<br/>find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds)"); 
   // Find all images for the specified date and hour (the minutes are checked further below).
   $images = glob("$year$month$day/image-$year$month$day$hour*");
@@ -496,10 +502,10 @@ function find_first_image_after_time($year, $month, $day, $hour, $minute, $secon
     debug("Now checking $image");
     // Get the date info for this image.
     list($year_split, $month_split, $day_split, $hour_split, $minute_split, $seconds_split) = split_image_filename($image);
-    $seconds_split = substr($seconds_split, 0, 2); // Subseconds are not needed.
-    if ("$hour$minute_split$seconds_split" >= "$hour$minute$seconds") { 
+    $seconds_split_compare = substr($seconds_split, 0, 2); // Not comparing with subseconds.
+    if ("$hour$minute_split$seconds_split_compare" >= "$hour$minute$seconds") { 
       // The image we are checking is taken after the time passed as parameter.
-      $image = "$year$month$day$hour$minute_split$seconds_split";
+      $image = "$year$month$day$hour$minute_split$seconds_split"; // Now we need the subseconds.
       debug("Success ($hour:$minute_split:$seconds_split >= $hour:$minute:$seconds): New image name: $image");
       break; // Success! This image was taken after the hour and minute passed as parameter.
     } else if ($hour_split > $hour) { 

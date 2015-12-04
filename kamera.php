@@ -50,7 +50,6 @@ function page_header($title, $previous, $next, $up, $down) {
   <meta name="robot" content="index, nofollow" />
   <meta name="generator" content="kamera.php: https://github.com/cloveras/kamera">
   <meta name="author" content="Christian Løverås">
-  <link rel="stylesheet" type="text/css" href="/style.css" />
   <link rel="stylesheet" type="text/css" href="/style-viktun.css" />
 
 END1;
@@ -154,8 +153,34 @@ function debug($txt) {
 
 // Footer
 // ------------------------------------------------------------
-function footer($count) {
-  print "\n<p>Bruk piltastene for å navigere forover (&#9654;), bakover (&#9664;), opp (&#9650;) og ned (&#9660;).</p>\n\n<p>\n";
+function footer($count, $previous, $next, $up, $down) {
+  
+  print "\n<p>Bruk piltastene for å navigere ";
+  
+  if ($next) {
+    print "<a href=\"$next\">forover</a> (&#9654;), ";
+  } else {
+    print "forover (&#9654;), ";
+  }
+  
+  if ($previous) {
+    print "<a href=\"$previous\">bakover</a> (&#9664;), ";
+  } else {
+    print "bakover (&#9664;), ";
+  }
+  
+  if ($up) {
+    print "<a href=\"$up\">opp</a> (&#9650;) ";
+  } else {
+    print "opp (&#9650;) ";
+  }
+  
+  if ($down) {
+    print "og <a href=\"$down\">ned</a> (&#9660;).</p>\n\n<p>\n";
+  } else {
+    print "og ned (&#9660;).</p>\n\n<p>\n";
+  }
+  
   if ($count > 0) {
     print "<a href=\"#\">Til toppen</a>.\n"; // Include link to top of page only if this is a "long" page.
   }
@@ -338,7 +363,7 @@ function print_full_month($year, $month) {
   if ($count == 0) {
     print "<p>(Ingen bilder å vise for " .  strftime("%B %Y", $timestamp) . ")</p>\n"; // No pictures found for this month.
   }
-  footer($count);
+  footer($count, $previous, $next, $up, $down);
 }
 
 // Print images for a whole year.
@@ -410,7 +435,7 @@ function print_full_year($year) {
   if ($count == 0) {
     print "<p>(Ingen bilder å vise for $year)</p>\n"; // No pictures found for this year.
   }
-  footer($count);
+  footer($count, $previous, $next, $up, $down);
 }
 
 // Print links to small and large images
@@ -605,7 +630,7 @@ function print_single_image($image_filename) {
   print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"640\" height=\"480\" src=\"$year$month$day/$image_filename\"/>";
   print "</a>";
   print "</p>\n";
-  footer();
+  footer($count, $previous, $next, $up, $down);
 }
 
 // Print details about the sun, and what images are shown.
@@ -798,7 +823,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   if ($count == 0) {
     print "<p>(Ingen bilder å vise for " .  strftime("%e. %B %Y", $timestamp) . ")</p>\n"; // No pictures found for this day.
   }
-  footer($count);
+  footer($count, $previous, $next, $up, $down);
 }
   
 // Action below
@@ -871,7 +896,7 @@ if ($type == "last") {
   page_header("Feil", false, false, false, false);
   print "<p>Ukjent type: \"$type\".</p>";
   print "<p><a href=\"javascript:history.back()\">Tilbake</a>.</p>\n";
-  footer(0);
+  footer();
 }
 
 ?>

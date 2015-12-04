@@ -352,7 +352,11 @@ function print_full_year($year) {
 
   // Find previous and next year, and create the links to them.
   $previous = "?type=year&year=" . ($year - 1);
-  $next = "?type=year&year=" . ($year + 1);
+  if ($year < date('Y')) {
+    $next = "?type=year&year=" . ($year + 1);
+  } else {
+    $next = false;
+  }
   $up = false; 
   // Down goes to the first month that has images.
   $down = false;
@@ -368,7 +372,8 @@ function print_full_year($year) {
   }
 
   //page_header("Viktun: " . count($days) . " bilder for hver måned i hele $year", $previous, $next, $up, $down);
-  page_header("Viktun: Bilder for hver måned i hele $year", $previous, $next, $up, $down);
+  page_header("Viktun: $year", $previous, $next, $up, $down);
+  print_previous_next_year_links($year);
 
   // Loop through all months 1-12 and print images for the $days if they exist.
   $count = 0;
@@ -627,6 +632,17 @@ function find_previous_and_next_month($year, $month) {
   return array($year_previous, $month_previous, $year_next, $month_next);
 }
 
+// Links to previsou and next year.
+// ------------------------------------------------------------
+function print_previous_next_year_links($year) {
+  print "<p><a href=\"?type=year&year=" . ($year - 1) . "\">Forrige (" . ($year - 1) . ")</a>.\n";
+  if ($year < date('Y')) {
+    print "<a href=\"?type=year&year=" . ($year + 1) . "\">Neste (" . ($year + 1) . ")</a>.\n";
+  }
+  print "<p>\n";
+}
+
+
 // Links to yesterday and (possibly) tomorrow.
 // ------------------------------------------------------------
 function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
@@ -674,6 +690,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
     // Link to the full month at 13:00
     //------------------------------------------------------------
     print "<a href=\"?type=month&year=" . date('Y', $timestamp) . "&month=" . date('m', $timestamp) . "\">Hele måneden (" . date('m', $timestamp) . ")</a>.\n";
+    print "<a href=\"?type=year&year=" . date('Y', $timestamp) . "\">Hele året (" . date('Y', $timestamp) . ")</a>.\n";
   }
   print "</p>\n\n";
 }

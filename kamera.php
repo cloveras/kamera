@@ -212,7 +212,7 @@ function find_sun_times($timestamp) {
   $polar_night = false;
   $polar_night_sunrise_hour = 11;
   $polar_night_sunset_hour = 12;
-  $adjust_dawn_dusk = 2.5 * 60 * 60; // How much before/after sunrise/sunset is dawn/dusk.
+  $adjust_dawn_dusk = 3 * 60 * 60; // How much before/after sunrise/sunset is dawn/dusk.
 
   // Where: Fylkesveg 862 110, 8314 Gimsøysand: 68.329891, 14.092439
   $latitude = 68.329891; // North
@@ -577,24 +577,26 @@ function print_single_image($image_filename) {
 
   // Links to previous, next, up, down.
   if ($previous_image) {
-    $previous = "?type=one&image=" . get_date_part_of_image_filename($previous_image); // Only date for the link.
+    $previous_datepart = get_date_part_of_image_filename($previous_image);
+    $previous = "?type=one&image=$previous_datepart"; // Only date for the link.
   }
   if ($next_image) {
-    $next = "?type=one&image=" . get_date_part_of_image_filename($next_image); // Only date for the link.
+    $next_datepart = get_date_part_of_image_filename($next_image);
+    $next = "?type=one&image=$next_datepart"; // Only date for the link.
   }
-  $up = "?type=day&date=" . get_date_part_of_image_filename($image_filename);; // The full day.
+  $up_datepart = get_date_part_of_image_filename($image_filename);
+  $up = "?type=day&date=$up_datepart"; // The full day.
   $down = false; // Already showing a single image, not possible to go lower.
 
   // Print!
-  if ($timestamp) {
-    $title = "Viktun: " . strtolower(strftime("%e. %B %Y kl %H:%M", $timestamp));
-  } else {
-    $title = "Viktun: Too early.";
-  }
+  $title = "Viktun: " . strtolower(strftime("%e. %B %Y kl %H:%M", $timestamp));
   page_header($title, $previous, $next, $up, $down);
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, false);
   print_full_day_link($timestamp);
+  print "<p>";
+  print "<a href=\"$previous\">Forrige (" . substr($previous_datepart, 8, 2) . ":" . substr($previous_datepart, 10, 2) . ")</a>.\n";
+  print "<a href=\"$next\">Neste (" . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . ")</a>.\n";
   debug("Showing image: $year$month$day/$image_filename");
   print "<p>";
   print "<a href=\"?type=day&date=$year$month$day\">";
@@ -718,7 +720,7 @@ function print_full_day_link($timestamp) {
   $year= date('Y', $timestamp);
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
-  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen ($year-$month-$day)</a>.</p>\n\n"; 
+  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen (" . trim(strftime("%e. %B %Y", $timestamp)) . ")</a>.</p>\n\n"; 
 }
 
 // Print all images in a diretory, between dawn and dusk, with small/large size, optionally limited by a number.

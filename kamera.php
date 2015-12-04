@@ -1,5 +1,4 @@
 <?php
-
 /* ============================================================
 //
 // kamera.php
@@ -620,7 +619,9 @@ function print_single_image($image_filename) {
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, false);
   print_full_day_link($timestamp);
   print "<p>";
-  print "<a href=\"$previous\">Forrige (" . substr($previous_datepart, 8, 2) . ":" . substr($previous_datepart, 10, 2) . ")</a>.\n";
+  if ($previous_datepart) {
+    print "<a href=\"$previous\">Forrige (" . substr($previous_datepart, 8, 2) . ":" . substr($previous_datepart, 10, 2) . ")</a>.\n";
+  }
   if ($next_datepart) {
     print "<a href=\"$next\">Neste (" . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . ")</a>.\n";
   }

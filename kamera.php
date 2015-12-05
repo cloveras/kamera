@@ -620,10 +620,10 @@ function print_single_image($image_filename) {
   print_full_day_link($timestamp);
   print "<p>";
   if ($previous_datepart) {
-    print "<a href=\"$previous\">Forrige (" . substr($previous_datepart, 8, 2) . ":" . substr($previous_datepart, 10, 2) . ")</a>.\n";
+    print "<a href=\"$previous\">Forrige: " . substr($previous_datepart, 8, 2) . ":" . substr($previous_datepart, 10, 2) . "</a>.\n";
   }
   if ($next_datepart) {
-    print "<a href=\"$next\">Neste (" . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . ")</a>.\n";
+    print "<a href=\"$next\">Neste: " . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . "</a>.\n";
   }
   debug("Showing image: $year$month$day/$image_filename");
   print "<p>";
@@ -649,7 +649,7 @@ function print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_su
   if ($include_interval == "day") {
     print ". Viser bilder tatt mellom " . date('H:i', $dawn) . " og " . date('H:i', $dusk);
   } else if ($include_interval == "average") {
-    print " (beregnet for den $monthly_day. i måneden)";
+    print " (beregnet for den $monthly_day.)";
   }
   print ".</p>\n\n";
 }
@@ -697,28 +697,28 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
   if ($is_full_month) {
     // Not links to yesterday and tomorrow, but the the previous and next months. Easy.
     list($year_previous, $month_previous, $year_next, $month_next) = find_previous_and_next_month(date('Y', $timestamp), date('m', $timestamp));
-    print "<p>\nForrige: <a href=\"?type=month&year=$year_previous&month=$month_previous\">$year_previous-$month_previous</a>. \n";
-    print "Neste: <a href=\"?type=month&year=$year_next&month=$month_next\">$year_next-$month_next</a>. \n";
+    print "<p><a href=\"?type=month&year=$year_previous&month=$month_previous\">Forrige: " . ucwords(strftime("%B", strtotime(date('Y-m', $timestamp)." -1 month"))) . "</a>. \n";
+    print "<a href=\"?type=month&year=$year_next&month=$month_next\">Neste: " .  ucwords(strftime("%B", strtotime(date('Y-m', $timestamp)." +1 month"))) . "</a>. \n";
     $this_month = date('Y-m'); // 2015-12
     $previous_month = date('Y-m', time() - 60 * 60 * 24 * 30); // 2015-11
     $requested_month = date('Y-m', $timestamp);
     //if (($requested_month != $this_month) && ($requested_month != $previous_month)) {
     if ($requested_month != $this_month) {
-      print "<a href=\"?type=month&year=" . date('Y') . "&month=" . date('m') . "\">Denne: $this_month</a>. \n";
+      print "<a href=\"?type=month&year=" . date('Y') . "&month=" . date('m') . "\">Nå: " . ucwords(strftime("%B")) . "</a>. \n";
     }
-    print "<a href=\"?\">I dag</a>. \n";
+      print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
   } else {
     // Work hard to find the days.
     // Yesterday always exists.
     $yesterday_timestamp = $timestamp - 60 * 60 * 24;
-    print "<p>\nForrige: <a href=\"?type=day&date=" . date('Ymd', $yesterday_timestamp) . "&size=$size\">" . date('Y-m-d', $yesterday_timestamp) . "</a>.\n";
+    print "<p>\n<a href=\"?type=day&date=" . date('Ymd', $yesterday_timestamp) . "&size=$size\">Forrige: " . strftime("%e. %B" , $yesterday_timestamp) . "</a>.\n";
     // Is there a tomorrow?
     $tomorrow_timestamp = $timestamp + 60 * 60 * 24;
     if (date('Y-m-d', $tomorrow_timestamp) > date('Y-m-d')) {
       // The next day is after the current day, so there will be no images to show.
     } else if (date('Ymd', $tomorrow_timestamp) != date('Y-m-d', $timestamp)) {
       // The next day is a day that we have images for.
-      print "Neste: <a href=\"?type=day&date=" . date('Ymd', $tomorrow_timestamp) . "\">" . date('Y-m-d', $tomorrow_timestamp) . "</a>.\n";
+      print "<a href=\"?type=day&date=" . date('Ymd', $tomorrow_timestamp) . "\">Neste: " . strftime("%e. %B", $tomorrow_timestamp) . "</a>.\n";
     }
     
     // Link to "today" if we are further back than the day before yesterday.
@@ -732,12 +732,12 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
       // The day shown was the current date.
     } else {
       // The day shown was the day before yesterday, or earlier.
-      print "<a href=\"?\">I dag</a>.\n";
+      print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
     }
     // Link to the full month at 13:00
     //------------------------------------------------------------
-    print "<a href=\"?type=month&year=" . date('Y', $timestamp) . "&month=" . date('m', $timestamp) . "\">Hele måneden (" . date('m', $timestamp) . ")</a>.\n";
-    print "<a href=\"?type=year&year=" . date('Y', $timestamp) . "\">Hele året (" . date('Y', $timestamp) . ")</a>.\n";
+    print "<a href=\"?type=month&year=" . date('Y', $timestamp) . "&month=" . date('m', $timestamp) . "\">Hele " . strftime("%B",  $timestamp) . "</a>.\n";
+    print "<a href=\"?type=year&year=" . date('Y', $timestamp) . "\">Hele " . date('Y', $timestamp) . "</a>.\n";
   }
   print "</p>\n\n";
 }
@@ -748,7 +748,7 @@ function print_full_day_link($timestamp) {
   $year= date('Y', $timestamp);
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
-  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen (" . trim(strftime("%e. %B %Y", $timestamp)) . ")</a>.</p>\n\n"; 
+  print "<p><a href=\"?type=day&date=$year$month$day\">Hele " . trim(strftime("%e. %B", $timestamp)) . "</a>.</p>\n\n"; 
 }
 
 // Print all images in a diretory, between dawn and dusk, with small/large size, optionally limited by a number.
@@ -771,7 +771,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   // Print header now that we have the details for it.
   $title = "Viktun: " . strtolower(strftime("%e. %B %Y", $timestamp));
   if ($number_of_images == 1) {
-    // Just the latest image, so include hour and minute too.
+    // We are printintg just the latest image, so include hour and minute too.
     $title .= " " . date('H', $timestamp) . ":" . date('i', $timestamp);
   }
   page_header($title, $previous, $next, $up, $down);

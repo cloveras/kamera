@@ -344,10 +344,16 @@ function print_full_month($year, $month) {
 	$image_datepart = get_date_part_of_image_filename($image);
 	list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_datepart);
 	// Print it!
-	if ($size == "small") {
+	if ($size == "small" || empty($size)) {
 	  // Print small images.
-	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
-	  print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	  //print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
+	  if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
+	    // If the small version has been created: Use that.
+	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$year$month$day/small/image-$image_datepart.jpg\"/></a>\n";
+	  } else {
+	    // If not: scale down the large version.
+	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	  }
 	} else if ($size == "large") {
 	  // Print large images.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
@@ -396,7 +402,6 @@ function print_full_year($year) {
     }
   }
 
-  //page_header("Viktun: " . count($days) . " bilder for hver måned i hele $year", $previous, $next, $up, $down);
   page_header("Viktun: $year", $previous, $next, $up, $down);
   print_previous_next_year_links($year);
 
@@ -444,10 +449,10 @@ function print_small_large_links($timestamp, $size) {
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
   print "<p>\n";
-  if ($size == "large" || $size = "") { // Link to small if we showed large, or don't know.
+  if ($size == "large" || empty($size)) { // Link to small if we showed large, or don't know.
     print "<a href=\"?type=day&date=$year$month$day&size=small\">Små bilder</a>.";
   }
-  if ($size == "small" || $size == "") { // Links to large if we showed small, or don't know.
+  if ($size == "small" || empty($size)) { // Links to large if we showed small, or don't know.
     print "<a href=\"?type=day&date=$year$month$day&size=large\">Store bilder</a>.";
   }
   print "</p>\n\n";
@@ -576,11 +581,14 @@ function print_single_image($image_filename) {
   $directory = "$year$month$day";
   // Loop through all images in this day's directory and look for the one passed as parameter.
   $images = get_all_images_in_directory($directory);
+
+
   $previous_image = false;
   $next_image = false;
+  $number_of_images = count($images); // Avoid counting in every iteration below.
   $i = 0;
   foreach($images as $image) {
-    if (preg_match("/$image_filename/", $images[$i])) {
+    if (strpos($images[$i], $image_filename) !== false) { // Faster than preg_match().
       // We found the one passed as paramter, now get previous and next.
       debug("MATCH: $image_filename == $images[$i]");
       $image_filename = "image-" . get_date_part_of_image_filename($images[$i]) . ".jpg";
@@ -590,7 +598,7 @@ function print_single_image($image_filename) {
 	// This was not the first image in the array, get the previous one.
 	$previous_image = $images[$i - 1];
       }
-      if ($i != count($images)) {
+      if ($i != $number_of_images) {
 	// This was not the last image in the array, get the next one.
 	$next_image = $images[$i + 1];
       }
@@ -693,6 +701,7 @@ function print_previous_next_year_links($year) {
 // Links to yesterday and (possibly) tomorrow.
 // ------------------------------------------------------------
 function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
+  global $size; 
 
   if ($is_full_month) {
     // Not links to yesterday and tomorrow, but the the previous and next months. Easy.
@@ -777,7 +786,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   page_header($title, $previous, $next, $up, $down);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, $number_of_images != 1);
   print_small_large_links($timestamp, $size);
-  print_yesterday_tomorrow_links($timestamp);
+  print_yesterday_tomorrow_links($timestamp, false);
   
   $count = 0;
   debug("Getting images from directory: <a href=\"$directory\">$directory</a>");
@@ -804,7 +813,13 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 	} else {
 	  // Default: Small (25%) without linebreaks.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
-	  print "<img title=\"$hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	  if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
+	    // If the small version has been created: Use that.
+	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$year$month$day/small/image-$image_datepart.jpg\"/></a>\n";
+	  } else {
+	    // If not: scale down the large version.
+	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	  }	  
 	}
 	
 	if ($number_of_images == 1) {
@@ -857,7 +872,7 @@ if (false) {
 if ($_SERVER['QUERY_STRING'] == 1) {
   $type = "last";
   debug("LAST");
-} else if ($_SERVER['QUERY_STRING'] == "") {
+} else if (empty($_SERVER['QUERY_STRING'])) {
   $type = "day";
   debug("DAY");
 } else {

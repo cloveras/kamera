@@ -234,8 +234,8 @@ function find_sun_times($timestamp) {
   $dusk = 0; 
   $midnight_sun = false; 
   $polar_night = false;
-  $polar_night_sunrise_hour = 11;
-  $polar_night_sunset_hour = 12;
+  $polar_night_sunrise_hour = 9;
+  $polar_night_sunset_hour = 15;
   $adjust_dawn_dusk = 3 * 60 * 60; // How much before/after sunrise/sunset is dawn/dusk.
 
   // Where: Fylkesveg 862 110, 8314 Gimsøysand: 68.329891, 14.092439
@@ -344,6 +344,10 @@ function print_full_month($year, $month) {
 	$image_datepart = get_date_part_of_image_filename($image);
 	list($year, $month, $day, $hour, $minute, $seconds) = split_image_filename($image_datepart);
 	// Print it!
+	if ($count == 0) {
+	  print "<p>\n";
+	}
+	print "<a href=\"?type=one&image=$image_datepart\">";
 	if ($size == "small" || empty($size)) {
 	  // Print small images.
 	  if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
@@ -364,7 +368,9 @@ function print_full_month($year, $month) {
        debug("Directory does not exist: $directory");
      }
   }
-  if ($count == 0) {
+  if ($count > 0) {
+    print "</p>\n";
+  } else {
     print "<p>(Ingen bilder å vise for " .  strftime("%B %Y", $timestamp) . ")</p>\n"; // No pictures found for this month.
   }
   footer($count, $previous, $next, $up, $down);
@@ -404,6 +410,23 @@ function print_full_year($year) {
   page_header("Viktun: $year", $previous, $next, $up, $down);
   print_previous_next_year_links($year);
 
+  // Links to all months.
+  print "\n<p>Måneder: \n";
+  for ($i = 1; $i <= 12; $i++) {
+    $month_timestamp = mktime(12, 0, 0, $i, 1, $year);
+    print "<a href=\"?type=month&year=$year&month=" . sprintf("%02d", $i) . "\">";
+    if ($i == 1) {
+      print ucwords(strftime("%B", $month_timestamp)) . "</a>, \n"; // Captial for January.
+    } else if ($i == 11) {
+      print strftime("%B", $month_timestamp) . "</a> og \n"; // "And" after November.
+    } else if ($i == 12) {
+      print strftime("%B", $month_timestamp) . "</a>.\n"; // Period after December.
+    } else {
+      print strftime("%B", $month_timestamp) . "</a>, \n"; // Comma after the other months.
+    }
+  }
+  print "</p>\n\n";
+
   // Loop through all months 1-12 and print images for the $days if they exist.
   $count = 0;
   $image_datepart = "";
@@ -422,6 +445,9 @@ function print_full_year($year) {
 	$image_filename = $year . "$month$day/" . "image-" . $image_datepart . ".jpg";
 	debug("Filename: $image_filename");
 	// Print it!
+	if ($count == 0) {
+	  print "<p>\n";
+	}
 	if ($size == "small") {
 	  // Print small images.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
@@ -441,8 +467,10 @@ function print_full_year($year) {
       }
     }
   }
-  if ($count == 0) {
-    print "<p>(Ingen bilder å vise for $year)</p>\n"; // No pictures found for this year.
+  if ($count > 0) {
+    print "</p>\n";
+  } else {
+    print "<p>(Ingen bilder å vise for " . strftime("%Y", mktime(12, 0, 0, 1, 1, $year)) . ")</p>\n"; // No pictures found for this year.
   }
   footer($count, $previous, $next, $up, $down);
 }
@@ -808,6 +836,9 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
       debug("image_timestamp: $image_timestamp<br/>dawn: $dawn<br/>dusk: $dusk");
       if (($image_timestamp <= $dusk) && ($image_timestamp >= $dawn)) {
 	debug("INSIDE: " . date('H:i:s', $dawn) . " / " . date('H:i:s', $image_timestamp) . " / " . date('H:i:s', $dusk));
+	if ($count == 0) {
+	  print "<p>\n";
+	}
 	if ($image_size == "large") {
 	  // Print full size with linebreaks.
 	  print "<p>";
@@ -834,6 +865,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 	
 	$count += 1;	
 	if ($count >= $number_of_images) {
+	  print "</p>\n";
 	  break;
 	}
       } else {
@@ -841,7 +873,9 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
       }
     }
   }
-  if ($count == 0) {
+  if ($count > 0) {
+    print "</p>\n";
+  } else {
     print "<p>(Ingen bilder å vise for " .  strftime("%e. %B %Y", $timestamp) . ")</p>\n"; // No pictures found for this day.
   }
   footer($count, $previous, $next, $up, $down);

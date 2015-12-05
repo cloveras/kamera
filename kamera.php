@@ -346,7 +346,6 @@ function print_full_month($year, $month) {
 	// Print it!
 	if ($size == "small" || empty($size)) {
 	  // Print small images.
-	  //print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
 	  if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
 	    // If the small version has been created: Use that.
 	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$year$month$day/small/image-$image_datepart.jpg\"/></a>\n";
@@ -426,7 +425,13 @@ function print_full_year($year) {
 	if ($size == "small") {
 	  // Print small images.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
-	  print "<img title=\"$year-$month-$day kl $hour\" alt=\"$year-$month-$day kl $hour\" width=\"160\" height=\"120\" src=\"$image_filename\"/></a>\n";
+	  if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
+	    // If the small version has been created: Use that.
+	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$year$month$day/small/image-$image_datepart.jpg\"/></a>\n";
+	  } else {
+	    // If not: scale down the large version.
+	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	  }
 	} else if ($size == "large") {
 	  // Print large images.
 	  print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";

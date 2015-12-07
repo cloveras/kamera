@@ -1,0 +1,7 @@
+# MAILTO=""
+
+# Copy the latest webcam imge to latest.jpg
+* * * * * /home/2/s/superelectric/www/viktun/kamera/copy-latest-image.sh
+
+# Make small image sof every webcam image
+* * * * * /home/2/s/superelectric/www/viktun/kamera/make-small-images.sh 

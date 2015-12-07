@@ -234,8 +234,9 @@ function find_sun_times($timestamp) {
   $dusk = 0; 
   $midnight_sun = false; 
   $polar_night = false;
-  $polar_night_sunrise_hour = 9;
+  $polar_night_sunrise_hour = 8; // When to start showing images during the polar night.
   $polar_night_sunset_hour = 15;
+  $polar_night_hours = 30; // Adding this to the hours below.
   $adjust_dawn_dusk = 3 * 60 * 60; // How much before/after sunrise/sunset is dawn/dusk.
 
   // Where: Fylkesveg 862 110, 8314 Gimsøysand: 68.329891, 14.092439
@@ -259,8 +260,8 @@ function find_sun_times($timestamp) {
     // No sun at all.
     $polar_night = true;
     // We still need to show a few images, so: faking sunrise and sunset.
-    $sunrise = mktime($polar_night_sunrise_hour, 0, 0, $month, $day, $year);
-    $sunset = mktime($polar_night_sunset_hour, 0, 0, $month, $day, $year); 
+    $sunrise = mktime($polar_night_sunrise_hour, $polar_night_hours, 0, $month, $day, $year);
+    $sunset = mktime($polar_night_sunset_hour, $polar_night_hours, 0, $month, $day, $year); 
     $dawn = $sunrise;
     $dusk = $sunset;
   } else {
@@ -298,11 +299,10 @@ function find_sun_times($timestamp) {
 // Print one image for every day in the month.
 // ------------------------------------------------------------
 function print_full_month($year, $month) {
+  debug("<br/>print_full_month($year, $month)");
   global $size;
   global $monthly_day;
   global $monthly_hour;
-
-  debug("<br/>print_full_month($year, $month)");
 
   // Find previous and next month, and create the links to them.
   list($year_previous, $month_previous, $year_next, $month_next) = find_previous_and_next_month($year, $month);
@@ -347,7 +347,7 @@ function print_full_month($year, $month) {
 	if ($count == 0) {
 	  print "<p>\n";
 	}
-	print "<a href=\"?type=one&image=$image_datepart\">";
+	print "<a href=\"?type=day&date=$year$month$day\">";
 	if ($size == "small" || empty($size)) {
 	  // Print small images.
 	  if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
@@ -379,12 +379,11 @@ function print_full_month($year, $month) {
 // Print images for a whole year.
 // ------------------------------------------------------------
 function print_full_year($year) {
+  debug("<br/>print_full_year($year)");
   global $size;
   //$days = array(1, 8, 15, 23); 
   $days = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31); // I don't have that many images yet..
   $hour = 11;
-
-  debug("<br/>print_full_year($year)");
 
   // Find previous and next year, and create the links to them.
   $previous = "?type=year&year=" . ($year - 1);
@@ -416,7 +415,7 @@ function print_full_year($year) {
     $month_timestamp = mktime(12, 0, 0, $i, 1, $year);
     print "<a href=\"?type=month&year=$year&month=" . sprintf("%02d", $i) . "\">";
     if ($i == 1) {
-      print ucwords(strftime("%B", $month_timestamp)) . "</a>, \n"; // Captial for January.
+      print ucwords(strftime("%B", $month_timestamp)) . "</a>, \n"; // Captial J for January.
     } else if ($i == 11) {
       print strftime("%B", $month_timestamp) . "</a> og \n"; // "And" after November.
     } else if ($i == 12) {
@@ -425,7 +424,10 @@ function print_full_year($year) {
       print strftime("%B", $month_timestamp) . "</a>, \n"; // Comma after the other months.
     }
   }
+  print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
   print "</p>\n\n";
+
+
 
   // Loop through all months 1-12 and print images for the $days if they exist.
   $count = 0;
@@ -433,7 +435,6 @@ function print_full_year($year) {
   $image_filename = "";
   for ($month = 1; $month <= 12; $month++) {
     $month = sprintf("%02d", $month);
-    debug("<br/>Checking month: $month");
     // Check for each of the days in the $days array
     foreach ($days as $day) {
       $day = sprintf("%02d", $day);
@@ -589,7 +590,6 @@ function find_first_image_after_time($year, $month, $day, $hour, $minute, $secon
 // ------------------------------------------------------------
 function print_single_image($image_filename) {
   // Works for 201511281504 and 2015112815 (minutes missing if this was arrow-down to get the first image)
-
   debug("<br/>print_single_image($image_filename)");
 
   if (strlen($image_filename) < strlen("YYYYMMDDHHMMSSSS")) {
@@ -667,7 +667,7 @@ function print_single_image($image_filename) {
     print "<a href=\"$next\">Neste: " . substr($next_datepart, 8, 2) . ":" . substr($next_datepart, 10, 2) . "</a>.\n";
   }
   debug("Showing image: $year$month$day/$image_filename");
-  print "<p>";
+  print "\n<p>";
   print "<a href=\"?type=day&date=$year$month$day\">";
   print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"640\" height=\"480\" src=\"$year$month$day/$image_filename\"/>";
   print "</a>";
@@ -744,11 +744,11 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
     $this_month = date('Y-m'); // 2015-12
     $previous_month = date('Y-m', time() - 60 * 60 * 24 * 30); // 2015-11
     $requested_month = date('Y-m', $timestamp);
-    //if (($requested_month != $this_month) && ($requested_month != $previous_month)) {
     if ($requested_month != $this_month) {
       print "<a href=\"?type=month&year=" . date('Y') . "&month=" . date('m') . "\">Nå: " . ucwords(strftime("%B")) . "</a>. \n";
     }
-      print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
+    print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
+    print "<a href=\"?type=year&year=" . date('Y', $timestamp) . "\">Hele " . date('Y', $timestamp) . "</a>.\n";
   } else {
     // Work hard to find the days.
     // Yesterday always exists.
@@ -790,16 +790,13 @@ function print_full_day_link($timestamp) {
   $year= date('Y', $timestamp);
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
-  print "<p><a href=\"?type=day&date=$year$month$day\">Hele " . trim(strftime("%e. %B", $timestamp)) . "</a>.</p>\n\n"; 
+  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen</a>.</p>\n\n"; 
 }
 
 // Print all images in a diretory, between dawn and dusk, with small/large size, optionally limited by a number.
 // ------------------------------------------------------------
 function print_full_day($timestamp, $image_size, $number_of_images) {
   global $size;
-  
-  // Get all *jpg images in "today's" image directory.
-  $directory = date('Ymd', $timestamp);
   debug("print_full_day($timestamp, $image_size, $number_of_images)");
   
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
@@ -820,7 +817,9 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, $number_of_images != 1);
   print_small_large_links($timestamp, $size);
   print_yesterday_tomorrow_links($timestamp, false);
-  
+
+  // Get all *jpg images in "today's" image directory.
+  $directory = date('Ymd', $timestamp);  
   $count = 0;
   debug("Getting images from directory: <a href=\"$directory\">$directory</a>");
   if (file_exists($directory)) {

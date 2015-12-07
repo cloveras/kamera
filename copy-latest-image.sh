@@ -9,4 +9,4 @@ today="$(date +'%Y%m%d')"
 cd /home/2/s/superelectric/www/viktun/kamera
 
 # If the "today" directory exists, copy the latest *.jpg image to latest.jpg in the current directory.
-[ -d $today ] && find $today -type f | grep jpg | grep -v latest | grep -v small | sort -r | head -n1 | xargs -I '{}' cp '{}' latest.jpg
+[ -d $today ] && find $today -type f | grep jpg | grep -v small | sort -r | head -n1 | xargs -I '{}' cp '{}' latest.jpg

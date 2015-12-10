@@ -8,8 +8,8 @@
 // Looks for directories and image files like this:
 // ./20151202/image-2015120209401201.jpg
 //
-// Finds sunrise, sunset, dawn and dusk, only shows images taken between dawn and dusk. 
-// Handles midnight sun and polar night.
+// Finds sunrise, sunset, dawn and dusk based on GPS coordinates.
+// Only shows images taken between dawn and dusk, handles midnight sun and polar night.
 //
 // The script started as a simple hack, then grew into this much larger and almost 
 // maintainable hack. It is a good candidate for a complete rewrite, if you have the time.
@@ -184,7 +184,7 @@ function footer($count, $previous, $next, $up, $down) {
     print "<a href=\"#\">Til toppen</a>.\n"; // Include link to top of page only if this is a "long" page.
   }
   print "<a href=\"http://www.lookr.com/lookout/1448496177-Lofoten\">Lookr: time-lapse</a>. \n";
-  print "<a href=\"../\">Viktun</a>\n</p>\n\n";
+  //print "<a href=\"../\">Viktun</a>\n</p>\n\n";
   print "</body>\n</html>\n";
 }
 
@@ -235,7 +235,7 @@ function find_sun_times($timestamp) {
   $midnight_sun = false; 
   $polar_night = false;
   $polar_night_sunrise_hour = 8; // When to start showing images during the polar night.
-  $polar_night_sunset_hour = 15;
+  $polar_night_sunset_hour = 15; // When to stop showing images during the polar night.
   $polar_night_hours = 30; // Adding this to the hours below.
   $adjust_dawn_dusk = 3 * 60 * 60; // How much before/after sunrise/sunset is dawn/dusk.
 
@@ -381,14 +381,14 @@ function print_full_month($year, $month) {
 function print_full_year($year) {
   debug("<br/>print_full_year($year)");
   global $size;
-  //$days = array(1, 8, 15, 23); 
+  //$days = array(1, 8, 15, 23); // Four days per month.
   $days = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31); // I don't have that many images yet..
   $hour = 11;
 
   // Find previous and next year, and create the links to them.
   $previous = "?type=year&year=" . ($year - 1);
   if ($year < date('Y')) {
-    $next = "?type=year&year=" . ($year + 1);
+    $next = "?type=year&year=" . ($year + 1); // Next only if it exists.
   } else {
     $next = false;
   }
@@ -427,9 +427,7 @@ function print_full_year($year) {
   print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
   print "</p>\n\n";
 
-
-
-  // Loop through all months 1-12 and print images for the $days if they exist.
+  // Loop through all months 1-12 (again, sorry) and print images for the $days if they exist.
   $count = 0;
   $image_datepart = "";
   $image_filename = "";
@@ -615,7 +613,6 @@ function print_single_image($image_filename) {
   // Loop through all images in this day's directory and look for the one passed as parameter.
   $images = get_all_images_in_directory($directory);
 
-
   $previous_image = false;
   $next_image = false;
   $number_of_images = count($images); // Avoid counting in every iteration below.
@@ -730,7 +727,6 @@ function print_previous_next_year_links($year) {
   print "<p>\n";
 }
 
-
 // Links to yesterday and (possibly) tomorrow.
 // ------------------------------------------------------------
 function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
@@ -813,6 +809,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
     // We are printintg just the latest image, so include hour and minute too.
     $title .= " " . date('H', $timestamp) . ":" . date('i', $timestamp);
   }
+
   page_header($title, $previous, $next, $up, $down);
   print_sunrise_sunset_info($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night, $number_of_images != 1);
   print_small_large_links($timestamp, $size);
@@ -855,11 +852,6 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 	    // If not: scale down the large version.
 	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
 	  }	  
-	}
-	
-	if ($number_of_images == 1) {
-	  // We only wanted the latest image.
-	  break;
 	}
 	
 	$count += 1;	
@@ -919,7 +911,6 @@ if ($_SERVER['QUERY_STRING'] == 1) {
 }
 debug("QUERY_STRING: " . $_SERVER['QUERY_STRING']);
 debug("type: $type<br/>date: $date<br/>year: $year</br>month: $month</br>size: $size<br/>image: $image<br/>last_image: $last_image");
-
 
 // Check the type, do the right thing
 // ------------------------------------------------------------

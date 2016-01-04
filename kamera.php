@@ -1,5 +1,9 @@
 <?php
-/*
+/* ============================================================
+//
+// kamera.php
+//
+// Generates HTML for webcam images.
 //
 // Looks for directories and image files like this:
 // ./20151202/image-2015120209401201.jpg

@@ -1,9 +1,5 @@
 <?php
-/* ============================================================
-//
-// kamera.php
-//
-// Generates HTML for webcam images.
+/*
 //
 // Looks for directories and image files like this:
 // ./20151202/image-2015120209401201.jpg
@@ -50,6 +46,24 @@ function page_header($title, $previous, $next, $up, $down) {
   <meta name="generator" content="kamera.php: https://github.com/cloveras/kamera">
   <meta name="author" content="Christian Løverås">
   <link rel="stylesheet" type="text/css" href="/style-viktun.css" />
+
+  <link rel="apple-touch-icon" sizes="57x57" href="/favicon/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/favicon/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/favicon/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/favicon/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/favicon/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/favicon/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/favicon/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/favicon/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192"  href="/favicon//android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+  <link rel="manifest" href="/favicon/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
 
 END1;
 
@@ -440,6 +454,7 @@ function print_full_year($year) {
       $image_datepart = find_first_image_after_time($year, $month, $day, $hour, 0, 0);
       if ($image_datepart) {
 	// Something was found.
+	$minute = substr($image_datepart, 10, 2);
 	debug("Found image: $image_datepart");
 	$image_filename = $year . "$month$day/" . "image-" . $image_datepart . ".jpg";
 	debug("Filename: $image_filename");
@@ -470,6 +485,95 @@ function print_full_year($year) {
     print "</p>\n";
   } else {
     print "<p>(Ingen bilder å vise for " . strftime("%Y", mktime(12, 0, 0, 1, 1, $year)) . ")</p>\n"; // No pictures found for this year.
+  }
+  footer($count, $previous, $next, $up, $down);
+}
+
+// Print images for all years
+// ------------------------------------------------------------
+function print_all_years() {
+  debug("<br/>print_all_years()");
+  global $size;
+  //$days = array(1, 8, 15, 23); // Four days per month.
+  $days = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31); // I don't have that many images yet..
+  $hour = 11;
+
+  // Find previous and next year, and create the links to them.
+  $previous = false;
+  $next = false;
+  $up = false; 
+  $down = false;
+
+
+  // Find first year with images.
+  $first_year_with_images = find_first_year_with_images();
+
+  $first_day_with_images = "";
+  for ($month = 1; $month <= 12; $month++) {
+    $month = sprintf("%02d", $month);
+    $first_day_with_images = find_first_day_with_images($year, $month);
+    if ($first_day_with_images) {
+      // We found a month (and also a day, which we don't need now).
+      $down = "?type=month&year=$year&month=$month";
+      break;
+    }
+  }
+
+  page_header("Viktun: Alle dager", $previous, $next, $up, $down);
+  //print_previous_next_year_links($year);
+
+  print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
+  print "</p>\n\n";
+
+  // Helpers for loops below.
+  $count = 0;
+  $image_datepart = "";
+  $image_filename = "";
+  
+  // Loop through all years, please.
+  for ($year = $first_year_with_images; $year <= date('Y'); $year++) {
+    // Loop through all months (1-12) for this year and print images for the $days if they exist.
+    for ($month = 1; $month <= 12; $month++) {
+      $month = sprintf("%02d", $month);
+      // Check for each of the days in the $days array
+      foreach ($days as $day) {
+	$day = sprintf("%02d", $day);
+	// Find first image for that day taken after $hour
+	$image_datepart = find_first_image_after_time($year, $month, $day, $hour, 0, 0);
+	if ($image_datepart) {
+	  $minute = substr($image_datepart, 10, 2);
+	  // Something was found.
+	  debug("Found image: $image_datepart");
+	  $image_filename = $year . "$month$day/" . "image-" . $image_datepart . ".jpg";
+	  debug("Filename: $image_filename");
+	  // Print it!
+	  if ($count == 0) {
+	    print "<p>\n";
+	  }
+	  if ($size == "small") {
+	    // Print small images.
+	    print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
+	    if (file_exists("$year$month$day/small/image-$image_datepart.jpg")) {
+	      // If the small version has been created: Use that.
+	      print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$year$month$day/small/image-$image_datepart.jpg\"/></a>\n";
+	    } else {
+	      // If not: scale down the large version.
+	      print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
+	    }
+	  } else if ($size == "large") {
+	    // Print large images.
+	    print "<a href=\"?type=one&image=$year$month$day$hour$minute$seconds\">";
+	    print "<img title=\"$year-$month-$day kl $hour:$minute\" alt=\"$year-$month-$day kl $hour\" width=\"640\" height=\"480\" src=\"$image\_filename\"/></a><br/>\n";
+	  }
+	  $count += 1;
+	}
+      }
+    }
+  }
+  if ($count > 0) {
+    print "</p>\n";
+  } else {
+    print "<p>(Ingen bilder å vise  - i det hele tatt!</p>\n"; // No pictures found for this year.
   }
   footer($count, $previous, $next, $up, $down);
 }
@@ -527,6 +631,13 @@ function find_first_day_with_images($year, $month) {
   $directory = $directories[0]; // This is the first one in that month.
   debug("First day with images: $directory");
   return $directory;
+}
+
+// Finds the first year with images.
+// ------------------------------------------------------------
+function find_first_year_with_images() {
+  debug("<br/>find_first_year_with_images()");
+  return 2015; // Hah!
 }
 
 // Gets all images in the directory for a specific day (20151202).
@@ -745,6 +856,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
     }
     print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
     print "<a href=\"?type=year&year=" . date('Y', $timestamp) . "\">Hele " . date('Y', $timestamp) . "</a>.\n";
+    print "<a href=\"?type=4ever\">Alt</a>.\n";
   } else {
     // Work hard to find the days.
     // Yesterday always exists.
@@ -772,10 +884,11 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
       // The day shown was the day before yesterday, or earlier.
       print "<a href=\"?\">I dag: " . strftime("%e. %B") . "</a>.\n";
     }
-    // Link to the full month at 13:00
+    // Link to the full month and year - and everything.
     //------------------------------------------------------------
     print "<a href=\"?type=month&year=" . date('Y', $timestamp) . "&month=" . date('m', $timestamp) . "\">Hele " . strftime("%B",  $timestamp) . "</a>.\n";
     print "<a href=\"?type=year&year=" . date('Y', $timestamp) . "\">Hele " . date('Y', $timestamp) . "</a>.\n";
+    print "<a href=\"?type=4ever\">Alt</a>.\n";
   }
   print "</p>\n\n";
 }
@@ -936,6 +1049,9 @@ if ($type == "last") {
 } else if ($type == "year") {
   // The full year, actually. Not all images, though.
   print_full_year($year);
+} else if ($type == "4ever") {
+  // One image for every day, 4-evah.
+  print_all_years($year);
 } else {
   // Unknown type.
   page_header("Feil", false, false, false, false);

@@ -11,7 +11,7 @@
 // Finds sunrise, sunset, dawn and dusk based on GPS coordinates.
 // Only shows images taken between dawn and dusk, handles midnight sun and polar night.
 //
-// The script started as a simple hack, then grew into this much larger and almost 
+// The script started as a simple hack, then grew into this much larger and almost
 // maintainable hack. It is a good candidate for a complete rewrite, if you have the time.
 //
 // Code: https://github.com/cloveras/kamera
@@ -30,7 +30,6 @@
 // * For surprisingly verbose feedback for debugging: $debug = 1
 //
 ============================================================ */
-
 
 // Functions
 // ============================================================
@@ -171,33 +170,33 @@ function debug($txt) {
 // Footer
 // ------------------------------------------------------------
 function footer($count, $previous, $next, $up, $down) {
-  
+
   print "\n<p>Bruk piltastene for å navigere ";
-  
+
   if ($next) {
     print "<a href=\"$next\">forover</a> (&#9654;), ";
   } else {
     print "forover (&#9654;), ";
   }
-  
+
   if ($previous) {
     print "<a href=\"$previous\">bakover</a> (&#9664;), ";
   } else {
     print "bakover (&#9664;), ";
   }
-  
+
   if ($up) {
     print "<a href=\"$up\">opp</a> (&#9650;) ";
   } else {
     print "opp (&#9650;) ";
   }
-  
+
   if ($down) {
     print "og <a href=\"$down\">ned</a> (&#9660;).</p>\n\n<p>\n";
   } else {
     print "og ned (&#9660;).</p>\n\n<p>\n";
   }
-  
+
   if ($count > 0) {
     print "<a href=\"#\">Til toppen</a>.\n"; // Include link to top of page only if this is a "long" page.
   }
@@ -247,10 +246,10 @@ function polar_night($month, $day) {
 function find_sun_times($timestamp) {
   // Return timestamps for everything.
   $sunrise = 0;
-  $sunset = 0; 
-  $dawn = 0; 
-  $dusk = 0; 
-  $midnight_sun = false; 
+  $sunset = 0;
+  $dawn = 0;
+  $dusk = 0;
+  $midnight_sun = false;
   $polar_night = false;
   $polar_night_sunrise_hour = 8; // When to start showing images during the polar night.
   $polar_night_sunset_hour = 15; // When to stop showing images during the polar night.
@@ -279,7 +278,7 @@ function find_sun_times($timestamp) {
     $polar_night = true;
     // We still need to show a few images, so: faking sunrise and sunset.
     $sunrise = mktime($polar_night_sunrise_hour, $polar_night_hours, 0, $month, $day, $year);
-    $sunset = mktime($polar_night_sunset_hour, $polar_night_hours, 0, $month, $day, $year); 
+    $sunset = mktime($polar_night_sunset_hour, $polar_night_hours, 0, $month, $day, $year);
     $dawn = $sunrise;
     $dusk = $sunset;
   } else {
@@ -297,7 +296,7 @@ function find_sun_times($timestamp) {
   if ($sunrise - $adjust_dawn_dusk < $day_start) {
     // The time from 00:00:00 to sunrise is less than the adjustment time. Set dawn to start of day.
     $dawn = $day_start;
-  }  
+  }
   if ($sunset + $adjust_dawn_dusk > $day_end) {
     // The time from sunset to 23:59:59 is less than the adjustment time. Set dusk to end of day.
     $dusk = $day_end;
@@ -410,7 +409,7 @@ function print_full_year($year) {
   } else {
     $next = false;
   }
-  $up = false; 
+  $up = false;
   // Down goes to the first month that has images.
   $down = false;
   $first_day_with_images = "";
@@ -505,7 +504,7 @@ function print_all_years() {
   // Find previous and next year, and create the links to them.
   $previous = false;
   $next = false;
-  $up = false; 
+  $up = false;
   $down = false;
 
 
@@ -533,7 +532,7 @@ function print_all_years() {
   $count = 0;
   $image_datepart = "";
   $image_filename = "";
-  
+
   // Loop through all years, please.
   for ($year = $first_year_with_images; $year <= date('Y'); $year++) {
     // Loop through all months (1-12) for this year and print images for the $days if they exist.
@@ -662,14 +661,14 @@ function get_latest_image_in_directory_by_date_hour($directory, $hour) {
 
 // Find the first image after a given time. Used when going to the first image in a day.
 // ------------------------------------------------------------
-function find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds) {  
+function find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds) {
   if ($minute < 10) {
     $minute = sprintf("%02d", $minute);
   }
   if ($seconds < 10) {
     $seconds = sprintf("%02d", $seconds);
   }
-  debug("<br/>find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds)"); 
+  debug("<br/>find_first_image_after_time($year, $month, $day, $hour, $minute, $seconds)");
   // Find all images for the specified date and hour (the minutes are checked further below).
   $images = glob("$year$month$day/image-$year$month$day$hour*");
   debug("Looking in directory: $year$month$day/image-$year$month$day$hour*");
@@ -679,12 +678,12 @@ function find_first_image_after_time($year, $month, $day, $hour, $minute, $secon
     // Get the date info for this image.
     list($year_split, $month_split, $day_split, $hour_split, $minute_split, $seconds_split) = split_image_filename($image);
     $seconds_split_compare = substr($seconds_split, 0, 2); // Not comparing with subseconds.
-    if ("$hour$minute_split$seconds_split_compare" >= "$hour$minute$seconds") { 
+    if ("$hour$minute_split$seconds_split_compare" >= "$hour$minute$seconds") {
       // The image we are checking is taken after the time passed as parameter.
       $image = "$year$month$day$hour$minute_split$seconds_split"; // Now we need the subseconds.
       debug("Success ($hour:$minute_split:$seconds_split >= $hour:$minute:$seconds): New image name: $image");
       break; // Success! This image was taken after the hour and minute passed as parameter.
-    } else if ($hour_split > $hour) { 
+    } else if ($hour_split > $hour) {
       $image = ""; // We have tried all images taken that hour.
       debug("No image found for that hour, and all have been checked: $hour_split > $hour");
       break;
@@ -845,7 +844,7 @@ function print_previous_next_year_links($year) {
 // Links to yesterday and (possibly) tomorrow.
 // ------------------------------------------------------------
 function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
-  global $size; 
+  global $size;
 
   if ($is_full_month) {
     // Not links to yesterday and tomorrow, but the the previous and next months. Easy.
@@ -874,7 +873,7 @@ function print_yesterday_tomorrow_links($timestamp, $is_full_month) {
       // The next day is a day that we have images for.
       print "<a href=\"?type=day&date=" . date('Ymd', $tomorrow_timestamp) . "\">Neste: " . strftime("%e. %B", $tomorrow_timestamp) . "</a>.\n";
     }
-    
+
     // Link to "today" if we are further back than the day before yesterday.
     $yesterday = strtotime("-1 day", time());
     $yesterday_formatted = date('Y-m-d', $yesterday);
@@ -903,7 +902,7 @@ function print_full_day_link($timestamp) {
   $year= date('Y', $timestamp);
   $month = date('m', $timestamp);
   $day = date('d', $timestamp);
-  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen</a>.</p>\n\n"; 
+  print "<p><a href=\"?type=day&date=$year$month$day\">Hele dagen</a>.</p>\n\n";
 }
 
 // Print all images in a diretory, between dawn and dusk, with small/large size, optionally limited by a number.
@@ -911,15 +910,15 @@ function print_full_day_link($timestamp) {
 function print_full_day($timestamp, $image_size, $number_of_images) {
   global $size;
   debug("print_full_day($timestamp, $image_size, $number_of_images)");
-  
+
   list($sunrise, $sunset, $dawn, $dusk, $midnight_sun, $polar_night) = find_sun_times($timestamp);
-  
+
   // Set the navigation (we need $dusk from above).
   $previous = "?type=day&date=" . date('Ymd', $timestamp - 60 * 60 * 24) . "&size=$size"; // The previous day.
   $next = "?type=day&date=" . date('Ymd', $timestamp + 60 * 60 * 24) . "&size=$size"; // The next day.
   $up = "?type=month&year=" . date('Y', $timestamp) . "&month=" . date('m', $timestamp); // Full month.
   $down = "?type=one&image=" . date('Ymd', $timestamp) . date('H', $dawn); // First image this day (no minutes, as image may not be taken exactly at dawn).
-  
+
   // Print header now that we have the details for it.
   $title = "Viktun: " . strtolower(strftime("%e. %B %Y", $timestamp));
   if ($number_of_images == 1) {
@@ -933,7 +932,7 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   print_yesterday_tomorrow_links($timestamp, false);
 
   // Get all *jpg images in "today's" image directory.
-  $directory = date('Ymd', $timestamp);  
+  $directory = date('Ymd', $timestamp);
   $count = 0;
   debug("Getting images from directory: <a href=\"$directory\">$directory</a>");
   if (file_exists($directory)) {
@@ -968,10 +967,10 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
 	  } else {
 	    // If not: scale down the large version.
 	    print "<img title=\"$year-$month-$day $hour:$minute\" alt=\"$year-$month-$day $hour:$minute\" width=\"160\" height=\"120\" src=\"$image\"/></a>\n";
-	  }	  
+	  }
 	}
-	
-	$count += 1;	
+
+	$count += 1;
 	if ($count >= $number_of_images) {
 	  print "</p>\n";
 	  break;
@@ -988,14 +987,14 @@ function print_full_day($timestamp, $image_size, $number_of_images) {
   }
   footer($count, $previous, $next, $up, $down);
 }
-  
+
 // Action below
 // ============================================================
 
 // Important variables and defaults.
 // ------------------------------------------------------------
 setlocale(LC_ALL,'no_NO');
-date_default_timezone_set("Europe/Oslo"); 
+date_default_timezone_set("Europe/Oslo");
 $timestamp = time();
 $debug = 0;
 $size = "small";
@@ -1010,7 +1009,7 @@ if (false) {
   $debug_year = "2015";
   $debug_month = "11";
   $debug_day = "28";
-  $timestamp = mktime(0, 0, 0, $debug_month, $debug_day, $debug_year); 
+  $timestamp = mktime(0, 0, 0, $debug_month, $debug_day, $debug_year);
   print "Today (set in debug): " . date('Y-m-d H:i', $timestamp) . "<br/>\n";
 }
 
@@ -1042,13 +1041,13 @@ if ($type == "last") {
 } else if ($type == "day") {
   // All images for the specified date either in $date parameter or created below: 20151130.
   if ($date) {
-    $timestamp = mktime(0, 0, 0, substr($date, 4, 2), substr($date, 6, 2), $year = substr($date, 0, 4));    
+    $timestamp = mktime(0, 0, 0, substr($date, 4, 2), substr($date, 6, 2), $year = substr($date, 0, 4));
   } // If $date is undefined, we use existing $timestamp.
   print_full_day($timestamp, $size, $max_images);
 } else if ($type == "month") {
   // All images for this month, spåecified with $year and $month parameters.
   if ($month && $year) {
-    print_full_month($year, sprintf("%02d", $month), $monthly_hour, $size); 
+    print_full_month($year, sprintf("%02d", $month), $monthly_hour, $size);
   }
 } else if ($type == "year") {
   // The full year, actually. Not all images, though.

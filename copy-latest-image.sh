@@ -11,8 +11,5 @@ cd /home/2/s/superelectric/www/viktun/kamera
 # If the "today" directory exists, copy the latest *.jpg image to latest.jpg in the current directory.
 [ -d $today ] && find $today -type f | grep jpg | grep -v small | sort -r | head -n1 | xargs -I '{}' cp '{}' latest.jpg
 
-# Also make a ".jpeg" version
-cp latest.jpg
-
 # Update timestamp on latest.jpg and latest.jpeg
 touch /home/2/s/superelectric/www/viktun/kamera/latest.jpg
